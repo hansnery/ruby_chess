@@ -17,6 +17,10 @@ module BoardMethods
     @board.rows[corrected_latitude][corrected_longitude].visited = true
   end
 
+  def position_pieces(pieces_array)
+    pieces_array.map { |piece| position_piece(piece) }
+  end
+
   def set_target(longitude, latitude)
     @root = [@piece.longitude, @piece.latitude]
     @target = @board.rows[8 - latitude][longitude - 1]

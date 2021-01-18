@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # :nodoc:
-class Knight
+class Rook
   attr_accessor :longitude, :latitude
   attr_reader :data, :possible_moves
 
@@ -9,10 +9,10 @@ class Knight
     @longitude = longitude
     @latitude = latitude
     @data = if side == 'white'
-              '♘ '
+              '♖ '
             else
-              '♞ '
+              '♜ '
             end
-    @possible_moves = [[1, 2], [2, 1], [2, -1], [1, -2], [-1, -2], [-2, -1], [-2, 1], [-1, 2]]
+    # @possible_moves = [[0, 2], [0, 1], [-1, 1], [1, 1]]
   end
 end
