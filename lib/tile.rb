@@ -2,13 +2,11 @@
 
 # :nodoc:
 class Tile
-  attr_accessor :data, :visited, :parent, :children, :longitude, :latitude
+  attr_accessor :data, :selected, :longitude, :latitude
 
   def initialize
     @data = '  '
-    @visited = false
-    @parent = nil
-    @children = []
+    @selected = false
     @longitude = nil
     @latitude = nil
   end

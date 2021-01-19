@@ -3,6 +3,7 @@
 # :nodoc:
 class Chess
   Dir[File.dirname(__FILE__) + '/lib/*.rb'].sort.each { |file| require file }
+  require 'colorize'
   include BoardMethods
 
   def initialize
@@ -25,10 +26,10 @@ class Chess
   def black_first_row
     black_first_row =
       [
-        @black_rook1 = Rook.new(1, 8, 'black'), @black_rook2 = Rook.new(7, 8, 'black'),
-        @black_knight1 = Knight.new(2, 8, 'black'), @black_knight2 = Knight.new(8, 8, 'black'),
+        @black_rook1 = Rook.new(1, 8, 'black'), @black_rook2 = Rook.new(8, 8, 'black'),
+        @black_knight1 = Knight.new(2, 8, 'black'), @black_knight2 = Knight.new(7, 8, 'black'),
         @black_bishop1 = Bishop.new(3, 8, 'black'), @black_bishop2 = Bishop.new(6, 8, 'black'),
-        @black_queen = Queen.new(4, 8, 'black'), @black_king = King.new(5, 8, 'black')
+        @black_king = King.new(5, 8, 'black'), @black_queen = Queen.new(4, 8, 'black')
       ]
     black_first_row
   end
@@ -47,10 +48,10 @@ class Chess
   def white_first_row
     white_first_row =
       [
-        @white_rook1 = Rook.new(1, 1, 'white'), @white_rook2 = Rook.new(7, 1, 'white'),
-        @white_knight1 = Knight.new(2, 1, 'white'), @white_knight2 = Knight.new(8, 1, 'white'),
+        @white_rook1 = Rook.new(1, 1, 'white'), @white_rook2 = Rook.new(8, 1, 'white'),
+        @white_knight1 = Knight.new(2, 1, 'white'), @white_knight2 = Knight.new(7, 1, 'white'),
         @white_bishop1 = Bishop.new(3, 1, 'white'), @white_bishop2 = Bishop.new(6, 1, 'white'),
-        @white_queen = Queen.new(4, 1, 'white'), @white_king = King.new(5, 1, 'white')
+        @white_king = King.new(5, 1, 'white'), @white_queen = Queen.new(4, 1, 'white')
       ]
     white_first_row
   end
@@ -83,57 +84,24 @@ class Chess
   def check_input(input)
     case input
     when /^[a-hA-H]{1}[1-8]/
-      set_target(@target_longitude, @target_latitude)
-      @queue = []
-      @queue << find_tile(@piece.longitude, @piece.latitude)
-      search_route
+      @selected_piece = find_piece(@target_longitude, @target_latitude)
+      tile = find_tile(@target_longitude, @target_latitude)
+      tile.selected = true
+      @board.print_board
     else
       puts 'Wrong input! Try again!'
       ask_input
     end
   end
 
-  # def search_route
-  #   until @queue.empty?
-  #     current_tile = @queue.first
-  #     update_position(letter_to_number(current_tile.longitude), current_tile.latitude)
-  #     @piece.possible_moves.each do |move|
-  #       break if @target.visited == true
+  def find_piece(longitude, latitude)
+    @pieces.map do |piece|
+      return piece if piece.longitude == longitude && piece.latitude == latitude
+    end
+  end
 
-  #       new_longitude = @piece.longitude + move[0]
-  #       new_latitude = @piece.latitude + move[1]
-  #       next_tile = find_tile(new_longitude, new_latitude)
+  # def show_possible_moves
 
-  #       next unless valid_move?(new_longitude, new_latitude) && next_tile.visited == false
-
-  #       next_tile.visited = true
-  #       next_tile.parent = current_tile
-  #       current_tile.children << next_tile
-
-  #       @queue << next_tile
-  #     end
-  #     @queue.shift
-  #   end
-  #   knight_moves
-  # end
-
-  # def count_parents(tile)
-  #   return if tile.parent.nil?
-
-  #   move = []
-  #   move << tile.parent.longitude
-  #   move << tile.parent.latitude
-  #   @result << move
-  #   count_parents(tile.parent)
-  # end
-
-  # def knight_moves
-  #   @result = []
-  #   final_move = [@target.longitude, @target.latitude]
-  #   @result << final_move
-  #   count_parents(@target)
-  #   @result.pop if @result.size > 1
-  #   puts "Minimum moves to reach the target: #{@result.reverse}"
   # end
 end
 

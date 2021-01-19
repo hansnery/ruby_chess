@@ -2,8 +2,8 @@
 
 # :nodoc:
 class King
-  attr_accessor :longitude, :latitude
-  attr_reader :data, :possible_moves
+  attr_accessor :longitude, :latitude, :data
+  attr_reader :possible_moves
 
   def initialize(longitude, latitude, side)
     @longitude = longitude

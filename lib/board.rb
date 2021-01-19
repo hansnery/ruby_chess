@@ -23,8 +23,8 @@ class Board
   def print_board(pos = 8)
     puts "\n"
     @rows.each_with_index do |sub_array, idx|
-      sub_array.each_with_index do |_, index|
-        print_black_and_white(sub_array, idx, index)
+      sub_array.each_with_index do |tile, index|
+        tile.selected == false ? print_black_and_white(sub_array, idx, index) : to_selected_background(tile)
         puts "|#{pos}\n" if index == 7
         pos -= 1 if index == 7
       end
@@ -49,13 +49,15 @@ class Board
   end
 
   def to_white_background(string)
-    # string.data.colorize(color: :black, background: :white)
-    string.data.colorize(background: :black)
+    string.data.colorize(background: :blue)
   end
 
   def to_black_background(string)
-    # string.data.colorize(color: :white, background: :black)
-    string.data.colorize(background: :blue)
+    string.data.colorize(background: :black)
+  end
+
+  def to_selected_background(string)
+    print string.data.colorize(background: :red)
   end
 
   def setup_board

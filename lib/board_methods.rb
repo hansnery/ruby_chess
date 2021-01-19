@@ -14,7 +14,7 @@ module BoardMethods
     corrected_latitude = (8 - @piece.latitude)
     corrected_longitude = (@piece.longitude - 1)
     @board.rows[corrected_latitude][corrected_longitude].data = @piece.data
-    @board.rows[corrected_latitude][corrected_longitude].visited = true
+    # @board.rows[corrected_latitude][corrected_longitude].visited = true
   end
 
   def position_pieces(pieces_array)

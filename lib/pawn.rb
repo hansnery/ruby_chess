@@ -2,8 +2,8 @@
 
 # :nodoc:
 class Pawn
-  attr_accessor :longitude, :latitude
-  attr_reader :data, :possible_moves
+  attr_accessor :longitude, :latitude, :data, :moved_once
+  attr_reader :possible_moves
 
   def initialize(longitude, latitude, side)
     @longitude = longitude
@@ -14,5 +14,6 @@ class Pawn
               '♟ '
             end
     @possible_moves = [[0, 2], [0, 1], [-1, 1], [1, 1]]
+    @moved_once = false
   end
 end
