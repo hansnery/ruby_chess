@@ -49,11 +49,13 @@ class Board
   end
 
   def to_white_background(string)
-    string.data.colorize(color: :black, background: :white)
+    # string.data.colorize(color: :black, background: :white)
+    string.data.colorize(background: :black)
   end
 
   def to_black_background(string)
-    string.data.colorize(color: :white, background: :black)
+    # string.data.colorize(color: :white, background: :black)
+    string.data.colorize(background: :blue)
   end
 
   def setup_board
