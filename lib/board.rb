@@ -24,7 +24,12 @@ class Board
     puts "\n"
     @rows.each_with_index do |sub_array, idx|
       sub_array.each_with_index do |tile, index|
-        tile.selected == false ? print_black_and_white(sub_array, idx, index) : to_selected_background(tile)
+        if tile.selected == false && tile.highlighted == false
+          print_black_and_white(sub_array, idx, index)
+        else
+          to_selected_background(tile) if tile.selected == true
+          to_highlighted_background(tile) if tile.highlighted == true
+        end
         puts "|#{pos}\n" if index == 7
         pos -= 1 if index == 7
       end
@@ -58,6 +63,10 @@ class Board
 
   def to_selected_background(string)
     print string.data.colorize(background: :red)
+  end
+
+  def to_highlighted_background(string)
+    print string.data.colorize(background: :yellow)
   end
 
   def setup_board

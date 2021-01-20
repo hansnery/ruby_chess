@@ -29,10 +29,9 @@ module BoardMethods
 
   def move_piece(new_longitude, new_latitude)
     empty_tile
-    @piece.longitude = new_longitude
-    @piece.latitude = new_latitude
-    p @piece
-    update_position(@piece.longitude, @piece.latitude)
+    @selected_piece.longitude = new_longitude
+    @selected_piece.latitude = new_latitude
+    update_position(@selected_piece.longitude, @selected_piece.latitude)
   end
 
   def target_coordinate(longitude, latitude, distance = [])
@@ -56,14 +55,22 @@ module BoardMethods
   end
 
   def empty_tile
-    @rows[8 - @piece.latitude][@piece.longitude - 1].data = '  '
+    @selected_tile.data = '  '
+  end
+
+  def clear_board
+    @selected_tile.selected = false
+    @highlighted_tiles.map do |tile|
+      tile.highlighted = false
+    end
+    @board.print_board
   end
 
   def update_position(longitude, latitude)
     # empty_tile
-    @piece.longitude = longitude
-    @piece.latitude = latitude
-    @board.rows[8 - latitude][longitude - 1].data = @piece.data
+    @selected_piece.longitude = longitude
+    @selected_piece.latitude = latitude
+    @board.rows[8 - latitude][longitude - 1].data = @selected_piece.data
     @board.print_board
   end
 
@@ -101,5 +108,58 @@ module BoardMethods
         p el
       end
     end
+  end
+
+  def setup_pieces
+    @pieces = []
+    black_first_row.map { |piece| @pieces << piece }
+    black_second_row.map { |piece| @pieces << piece }
+    white_first_row.map { |piece| @pieces << piece }
+    white_second_row.map { |piece| @pieces << piece }
+    position_pieces(@pieces)
+  end
+
+  def black_first_row
+    black_first_row =
+      [
+        @black_rook1 = Rook.new(1, 8, 'black'), @black_rook2 = Rook.new(8, 8, 'black'),
+        @black_knight1 = Knight.new(2, 8, 'black'), @black_knight2 = Knight.new(7, 8, 'black'),
+        @black_bishop1 = Bishop.new(3, 8, 'black'), @black_bishop2 = Bishop.new(6, 8, 'black'),
+        @black_king = King.new(5, 8, 'black'), @black_queen = Queen.new(4, 8, 'black')
+      ]
+    black_first_row
+  end
+
+  def black_second_row
+    black_second_row =
+      [
+        @black_pawn1 = Pawn.new(1, 7, 'black'), @black_pawn2 = Pawn.new(2, 7, 'black'),
+        @black_pawn3 = Pawn.new(3, 7, 'black'), @black_pawn4 = Pawn.new(4, 7, 'black'),
+        @black_pawn5 = Pawn.new(5, 7, 'black'), @black_pawn6 = Pawn.new(6, 7, 'black'),
+        @black_pawn7 = Pawn.new(7, 7, 'black'), @black_pawn8 = Pawn.new(8, 7, 'black')
+      ]
+    black_second_row
+  end
+
+  def white_first_row
+    white_first_row =
+      [
+        @white_rook1 = Rook.new(1, 1, 'white'), @white_rook2 = Rook.new(8, 1, 'white'),
+        @white_knight1 = Knight.new(2, 1, 'white'), @white_knight2 = Knight.new(7, 1, 'white'),
+        @white_bishop1 = Bishop.new(3, 1, 'white'), @white_bishop2 = Bishop.new(6, 1, 'white'),
+        @white_king = King.new(5, 1, 'white'), @white_queen = Queen.new(4, 1, 'white')
+      ]
+    white_first_row
+  end
+
+  def white_second_row
+    white_second_row =
+      [
+        @white_pawn1 = Pawn.new(1, 2, 'white'), @white_pawn2 = Pawn.new(2, 2, 'white'),
+        @white_pawn3 = Pawn.new(3, 2, 'white'), @white_pawn4 = Pawn.new(4, 2, 'white'),
+        @white_pawn5 = Pawn.new(5, 2, 'white'), @white_pawn6 = Pawn.new(6, 2, 'white'),
+        @white_pawn7 = Pawn.new(7, 2, 'white'), @white_pawn8 = Pawn.new(8, 2, 'white')
+      ]
+    white_second_row
   end
 end

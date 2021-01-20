@@ -3,7 +3,7 @@
 # :nodoc:
 class Pawn
   attr_accessor :longitude, :latitude, :data, :moved_once
-  attr_reader :possible_moves
+  attr_reader :possible_moves, :diagonal_attack
 
   def initialize(longitude, latitude, side)
     @longitude = longitude
@@ -13,7 +13,12 @@ class Pawn
             else
               '♟ '
             end
-    @possible_moves = [[0, 2], [0, 1], [-1, 1], [1, 1]]
+    @possible_moves = [[0, 2], [0, 1]]
+    @diagonal_attack = [[-1, 1], [1, 1]]
     @moved_once = false
+  end
+
+  def jumped?
+    @moved_once == true && @possible_moves.size > 1
   end
 end

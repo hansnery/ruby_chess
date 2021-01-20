@@ -1,1 +1,2 @@
-tile.data.colorize(background: :red)
+
+      # latitude = tile.latitude.to_s
