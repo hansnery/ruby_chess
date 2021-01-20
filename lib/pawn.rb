@@ -2,7 +2,7 @@
 
 # :nodoc:
 class Pawn
-  attr_accessor :longitude, :latitude, :data, :moved_once
+  attr_accessor :longitude, :latitude, :data, :moved_once, :side
   attr_reader :possible_moves, :diagonal_attack
 
   def initialize(longitude, latitude, side)
@@ -16,6 +16,7 @@ class Pawn
     @possible_moves = [[0, 2], [0, 1]]
     @diagonal_attack = [[-1, 1], [1, 1]]
     @moved_once = false
+    @side = side
   end
 
   def jumped?

@@ -2,7 +2,7 @@
 
 # :nodoc:
 class Knight
-  attr_accessor :longitude, :latitude, :data
+  attr_accessor :longitude, :latitude, :data, :side
   attr_reader :possible_moves
 
   def initialize(longitude, latitude, side)
@@ -13,6 +13,7 @@ class Knight
             else
               '♞ '
             end
-    @possible_moves = [[1, 2], [2, 1], [2, -1], [1, -2], [-1, -2], [-2, -1], [-2, 1], [-1, 2]]
+    @possible_moves = [[0, 2], [0, 1]]
+    @side = side
   end
 end
