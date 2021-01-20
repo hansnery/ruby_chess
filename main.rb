@@ -34,27 +34,32 @@ class Chess
     when /^[a-hA-H]{1}[1-8]/
       play_round(input)
     else
-      puts 'Wrong input! Try again!'
-      ask_input
+      wrong_input
     end
   end
 
   def play_round(input)
     if @moving == false
+      check_target
       select_piece
       show_possible_moves
       @board.print_board
       select_destination
     else
       check_move(input)
+      check_target
       ask_input
     end
   end
 
-  def find_piece(longitude, latitude)
-    @pieces.map do |piece|
-      return piece if piece.longitude == longitude && piece.latitude == latitude
-    end
+  def wrong_input
+    puts 'Wrong input! Try again!'
+    ask_input
+  end
+
+  def check_target
+    target = find_tile(@target_longitude, @target_latitude)
+    wrong_input if target.empty?
   end
 
   def select_piece
@@ -88,7 +93,6 @@ class Chess
       clear_board
       @selected_piece.moved_once = true if @selected_piece.class == Pawn && @selected_piece.moved_once == false
       @moving = false
-      p @selected_piece
     end
   end
 end

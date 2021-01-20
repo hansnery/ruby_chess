@@ -14,7 +14,6 @@ module BoardMethods
     corrected_latitude = (8 - @piece.latitude)
     corrected_longitude = (@piece.longitude - 1)
     @board.rows[corrected_latitude][corrected_longitude].data = @piece.data
-    # @board.rows[corrected_latitude][corrected_longitude].visited = true
   end
 
   def position_pieces(pieces_array)
@@ -31,7 +30,8 @@ module BoardMethods
     empty_tile
     @selected_piece.longitude = new_longitude
     @selected_piece.latitude = new_latitude
-    update_position(@selected_piece.longitude, @selected_piece.latitude)
+    @board.rows[8 - new_latitude][new_longitude - 1].data = @selected_piece.data
+    @board.print_board
   end
 
   def target_coordinate(longitude, latitude, distance = [])
@@ -66,20 +66,16 @@ module BoardMethods
     @board.print_board
   end
 
-  def update_position(longitude, latitude)
-    # empty_tile
-    @selected_piece.longitude = longitude
-    @selected_piece.latitude = latitude
-    @board.rows[8 - latitude][longitude - 1].data = @selected_piece.data
-    @board.print_board
-  end
-
   def valid_move?(new_longitude, new_latitude)
-    return false if new_longitude > 8 || new_longitude < 1 || new_latitude > 8 || new_latitude < 1
+    return false if out_of_the_board?
 
     @piece.possible_moves.each do |move|
       return true if move[0] == (new_longitude - @piece.longitude) && move[1] == (new_latitude - @piece.latitude)
     end
+  end
+
+  def out_of_the_board?
+    new_longitude > 8 || new_longitude < 1 || new_latitude > 8 || new_latitude < 1
   end
 
   def letter_to_number(letter)
@@ -91,6 +87,12 @@ module BoardMethods
   def number_to_letter(number)
     @board.board_letters.each_with_index do |board_letter, index|
       return board_letter if number - 1 == index
+    end
+  end
+
+  def find_piece(longitude, latitude)
+    @pieces.map do |piece|
+      return piece if piece.longitude == longitude && piece.latitude == latitude
     end
   end
 

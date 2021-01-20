@@ -11,4 +11,8 @@ class Tile
     @selected = false
     @highlighted = false
   end
+
+  def empty?
+    @data == '  '
+  end
 end

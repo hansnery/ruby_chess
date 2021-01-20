@@ -24,17 +24,21 @@ class Board
     puts "\n"
     @rows.each_with_index do |sub_array, idx|
       sub_array.each_with_index do |tile, index|
-        if tile.selected == false && tile.highlighted == false
-          print_black_and_white(sub_array, idx, index)
-        else
-          to_selected_background(tile) if tile.selected == true
-          to_highlighted_background(tile) if tile.highlighted == true
-        end
+        tile_unselected_and_unhighlighted?(tile) ? print_black_and_white(sub_array, idx, index) : paint_tile(tile)
         puts "|#{pos}\n" if index == 7
         pos -= 1 if index == 7
       end
     end
     puts 'a b c d e f g h'
+  end
+
+  def tile_unselected_and_unhighlighted?(tile)
+    tile.selected == false && tile.highlighted == false
+  end
+
+  def paint_tile(tile)
+    to_selected_background(tile) if tile.selected == true
+    to_highlighted_background(tile) if tile.highlighted == true
   end
 
   def print_black_and_white(sub_array, idx, index)

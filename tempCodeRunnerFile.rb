@@ -1,2 +1,1 @@
-
-      # latitude = tile.latitude.to_s
+check_target
