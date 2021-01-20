@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 # :nodoc:
+# rubocop:disable Metrics/PerceivedComplexity,Metrics/CyclomaticComplexity,Metrics/AbcSize
 class Board
   require_relative 'tile'
   require 'colorize'
@@ -91,3 +92,5 @@ class Board
     end
   end
 end
+# rubocop:enable Metrics/PerceivedComplexity,Metrics/CyclomaticComplexity,Metrics/AbcSize
+# EOF
