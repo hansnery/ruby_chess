@@ -10,10 +10,9 @@ module BoardMethods
   end
 
   def position_piece(piece)
-    @piece = piece
-    corrected_latitude = (8 - @piece.latitude)
-    corrected_longitude = (@piece.longitude - 1)
-    @board.rows[corrected_latitude][corrected_longitude].data = @piece.data
+    corrected_latitude = (8 - piece.latitude)
+    corrected_longitude = (piece.longitude - 1)
+    @board.rows[corrected_latitude][corrected_longitude].data = piece.data
   end
 
   def position_pieces(pieces_array)
@@ -21,7 +20,7 @@ module BoardMethods
   end
 
   def set_target(longitude, latitude)
-    @root = [@piece.longitude, @piece.latitude]
+    @root = [@selected_piece.longitude, @selected_piece.latitude]
     @target = @board.rows[8 - latitude][longitude - 1]
     @target_coordinate = target_coordinate(longitude, latitude)
   end
@@ -50,8 +49,8 @@ module BoardMethods
     result
   end
 
-  def target_reached?
-    return true if @piece.longitude == @target_coordinate[0] && @piece.latitude == @target_coordinate[1]
+  def target_reached?(piece)
+    return true if piece.longitude == @target_coordinate[0] && piece.latitude == @target_coordinate[1]
   end
 
   def empty_tile
@@ -66,11 +65,11 @@ module BoardMethods
     @board.print_board
   end
 
-  def valid_move?(new_longitude, new_latitude)
+  def valid_move?(new_longitude, new_latitude, piece)
     return false if out_of_the_board?
 
-    @piece.possible_moves.each do |move|
-      return true if move[0] == (new_longitude - @piece.longitude) && move[1] == (new_latitude - @piece.latitude)
+    piece.possible_moves.each do |move|
+      return true if move[0] == (new_longitude - piece.longitude) && move[1] == (new_latitude - piece.latitude)
     end
   end
 

@@ -40,14 +40,12 @@ class Chess
 
   def play_round(input)
     if @moving == false
-      check_target
+      check_tile
       select_piece
       show_possible_moves
-      @board.print_board
       select_destination
     else
       check_move(input)
-      check_target
       ask_input
     end
   end
@@ -57,9 +55,13 @@ class Chess
     ask_input
   end
 
-  def check_target
+  def check_tile
     target = find_tile(@target_longitude, @target_latitude)
     wrong_input if target.empty?
+  end
+
+  def check_destination(input)
+    wrong_input if input == number_to_letter(@selected_piece.longitude) + @selected_piece.latitude.to_s
   end
 
   def select_piece
@@ -76,6 +78,7 @@ class Chess
       tile.highlighted = true
       @highlighted_tiles << tile
     end
+    @board.print_board
   end
 
   def select_destination
@@ -86,6 +89,7 @@ class Chess
   end
 
   def check_move(input)
+    check_destination(input)
     @highlighted_tiles.map do |tile|
       longitude = tile.longitude.to_s
       latitude = tile.latitude.to_s
