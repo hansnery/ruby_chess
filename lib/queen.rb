@@ -8,12 +8,16 @@ class Queen
   def initialize(longitude, latitude, side)
     @longitude = longitude
     @latitude = latitude
+    @possible_moves = [[0, 2], [0, 1]]
+    @side = side
+    set_character
+  end
+
+  def set_character
     @data = if side == 'white'
               '♕ '
             else
               '♛ '
             end
-    @possible_moves = [[0, 2], [0, 1]]
-    @side = side
   end
 end
