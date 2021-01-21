@@ -11,18 +11,22 @@ class Chess
     welcome
     @board = Board.new
     setup_pieces
-    @board.print_board
     ask_input
   end
 
   def welcome
     puts "\nWelcome to RubyChess!\n\nIn this program you can play chess using just the command line!"
-    puts "\nTo select the piece you wish to move, type in the piece\'s"
+    puts "\nTo select and move a piece, type in the piece\'s"
     puts 'coordinates using algebraic notation (eg: b3).'
   end
 
   def ask_input
-    @moving == false ? 'SELECT PIECE: ' : 'MOVE TO: '
+    @board.print_board
+    if @moving == false
+      puts 'SELECT PIECE: '
+    else
+      puts 'MOVE TO: '
+    end
     input = gets.chomp
     @target_longitude = letter_to_longitude(input[0])
     @target_latitude = input[1].to_i
@@ -78,12 +82,9 @@ class Chess
       tile.highlighted = true
       @highlighted_tiles << tile
     end
-    @board.print_board
   end
 
   def select_destination
-    puts "\nTo move the piece, type in the tile\'s"
-    puts 'coordinates using algebraic notation (eg: b3).'
     @moving = true
     ask_input
   end

@@ -30,7 +30,6 @@ module BoardMethods
     @selected_piece.longitude = new_longitude
     @selected_piece.latitude = new_latitude
     @board.rows[8 - new_latitude][new_longitude - 1].data = @selected_piece.data
-    @board.print_board
   end
 
   def target_coordinate(longitude, latitude, distance = [])
@@ -62,7 +61,6 @@ module BoardMethods
     @highlighted_tiles.map do |tile|
       tile.highlighted = false
     end
-    @board.print_board
   end
 
   def valid_move?(new_longitude, new_latitude, piece)
