@@ -66,6 +66,13 @@ class Chess
 
   def check_destination(input)
     wrong_input if input == number_to_letter(@selected_piece.longitude) + @selected_piece.latitude.to_s
+    piece = find_piece(@target_longitude, @target_latitude)
+    p piece
+    unless piece.nil?
+      piece.longitude = nil
+      piece.latitude = nil
+    end
+    p piece
   end
 
   def select_piece

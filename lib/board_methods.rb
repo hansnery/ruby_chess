@@ -91,6 +91,7 @@ module BoardMethods
     @pieces.map do |piece|
       return piece if piece.longitude == longitude && piece.latitude == latitude
     end
+    nil
   end
 
   def find_tile(longitude, latitude)
