@@ -7,6 +7,7 @@ class Chess
   include BoardMethods
 
   def initialize
+    @turn = 'white'
     @moving = false
     welcome
     @board = Board.new
@@ -23,9 +24,9 @@ class Chess
   def ask_input
     @board.print_board
     if @moving == false
-      puts 'SELECT PIECE: '
+      print_select_piece
     else
-      puts 'MOVE TO: '
+      print_move_to
     end
     input = gets.chomp
     @target_longitude = letter_to_longitude(input[0])
@@ -38,13 +39,13 @@ class Chess
     when /^[a-hA-H]{1}[1-8]/
       play_round(input)
     else
-      wrong_input
+      try_again('wrong_input')
     end
   end
 
   def play_round(input)
     if @moving == false
-      check_tile
+      check_tile_and_piece
       select_piece
       show_possible_moves
       select_destination
@@ -54,25 +55,21 @@ class Chess
     end
   end
 
-  def wrong_input
-    puts 'Wrong input! Try again!'
+  def try_again(because)
+    puts 'Wrong input! Try again!' if because == 'wrong_input'
+    puts 'It\'s white\'s turn!' if because == 'whites_turn'
+    puts 'It\'s black\'s turn!' if because == 'blacks_turn'
     ask_input
   end
 
-  def check_tile
-    target = find_tile(@target_longitude, @target_latitude)
-    wrong_input if target.empty?
-  end
+  def check_tile_and_piece
+    target_tile = find_tile(@target_longitude, @target_latitude)
+    target_piece = find_piece(@target_longitude, @target_latitude)
+    try_again('wrong_input') if target_tile.empty? && @moving == false
+    return unless target_piece.respond_to?(:side)
 
-  def check_destination(input)
-    wrong_input if input == number_to_letter(@selected_piece.longitude) + @selected_piece.latitude.to_s
-    piece = find_piece(@target_longitude, @target_latitude)
-    # p piece
-    return if piece.nil?
-
-    piece.longitude = nil
-    piece.latitude = nil
-    # p piece
+    try_again('blacks_turn') if target_piece.side == 'white' && @turn != 'white' && @moving == false
+    try_again('whites_turn') if target_piece.side == 'black' && @turn != 'black' && @moving == false
   end
 
   def select_piece
@@ -90,9 +87,21 @@ class Chess
         tile.highlighted = true
         @highlighted_tiles << tile
       else
-        wrong_input
+        try_again('wrong_input')
       end
     end
+  end
+
+  def check_destination(input)
+    try_again('wrong_input') if input == number_to_letter(@selected_piece.longitude) + @selected_piece.latitude.to_s
+    check_tile_and_piece
+    piece = find_piece(@target_longitude, @target_latitude)
+    # p piece
+    return if piece.nil?
+
+    piece.longitude = nil
+    piece.latitude = nil
+    # p piece
   end
 
   def select_destination
@@ -109,6 +118,24 @@ class Chess
       clear_board
       @selected_piece.moved_once = true if @selected_piece.class == Pawn && @selected_piece.moved_once == false
       @moving = false
+      @turn = 'black' if @selected_piece.side == 'white'
+      @turn = 'white' if @selected_piece.side == 'black'
+    end
+  end
+
+  def print_select_piece
+    if @turn == 'white'
+      puts 'SELECT PIECE(WHITE): '
+    else
+      puts 'SELECT PIECE(BLACK): '
+    end
+  end
+
+  def print_move_to
+    if @turn == 'white'
+      puts 'MOVE TO(WHITE): '
+    else
+      puts 'MOVE TO(BLACK): '
     end
   end
 end

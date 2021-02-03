@@ -1,3 +1,1 @@
-
-    # piece.latitude = nil
-    # p piece
+check_tile_and_piece
