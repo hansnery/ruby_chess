@@ -96,8 +96,8 @@ module BoardMethods
 
   def find_tile(longitude, latitude)
     @board.rows.each do |row|
-      row.each do |el|
-        return el if el.longitude == number_to_letter(longitude) && el.latitude == latitude
+      row.each do |tile|
+        return tile if tile.longitude == number_to_letter(longitude) && tile.latitude == latitude
       end
     end
   end

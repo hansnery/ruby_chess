@@ -67,12 +67,12 @@ class Chess
   def check_destination(input)
     wrong_input if input == number_to_letter(@selected_piece.longitude) + @selected_piece.latitude.to_s
     piece = find_piece(@target_longitude, @target_latitude)
-    p piece
-    unless piece.nil?
-      piece.longitude = nil
-      piece.latitude = nil
-    end
-    p piece
+    # p piece
+    return if piece.nil?
+
+    piece.longitude = nil
+    piece.latitude = nil
+    # p piece
   end
 
   def select_piece
@@ -86,8 +86,12 @@ class Chess
     @selected_piece.possible_moves.shift if @selected_piece.class == Pawn && @selected_piece.jumped?
     @selected_piece.possible_moves.map do |move|
       tile = find_tile(@target_longitude + move[0], @target_latitude + move[1])
-      tile.highlighted = true
-      @highlighted_tiles << tile
+      if tile.respond_to?(:longitude) && tile.respond_to?(:latitude)
+        tile.highlighted = true
+        @highlighted_tiles << tile
+      else
+        wrong_input
+      end
     end
   end
 
