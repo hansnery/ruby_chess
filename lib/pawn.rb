@@ -9,6 +9,7 @@ class Pawn
     @longitude = longitude
     @latitude = latitude
     @side = side
+    @moved_once = false
     set_character
     set_moves
   end
@@ -22,7 +23,6 @@ class Pawn
   end
 
   def set_moves
-    @moved_once = false
     @possible_moves = if side == 'white'
                         [[0, 2], [0, 1]]
                       else
