@@ -8,11 +8,9 @@ class Pawn
   def initialize(longitude, latitude, side)
     @longitude = longitude
     @latitude = latitude
-    @possible_moves = [[0, 2], [0, 1]]
-    @diagonal_attack = [[-1, 1], [1, 1]]
-    @moved_once = false
     @side = side
     set_character
+    set_moves
   end
 
   def set_character
@@ -21,6 +19,20 @@ class Pawn
             else
               '♟ '
             end
+  end
+
+  def set_moves
+    @moved_once = false
+    @possible_moves = if side == 'white'
+                        [[0, 2], [0, 1]]
+                      else
+                        [[0, -2], [0, -1]]
+                      end
+    @diagonal_attack = if side == 'white'
+                         [[-1, 1], [1, 1]]
+                       else
+                         [[-1, -1], [1, -1]]
+                       end
   end
 
   def jumped?
