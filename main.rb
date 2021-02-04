@@ -86,8 +86,9 @@ class Chess
     check_for_pawn_diagonals
     @selected_piece.possible_moves.shift if @selected_piece.class == Pawn && @selected_piece.jumped?
     @selected_piece.possible_moves.map do |move|
+      piece = find_piece(@target_longitude + move[0], @target_latitude + move[1])
       tile = find_tile(@target_longitude + move[0], @target_latitude + move[1])
-      if inside_the_board?(tile) && (tile.empty? || @selected_piece.class != Pawn)
+      if inside_the_board?(tile) && (tile.empty? || @selected_piece.class != Pawn && piece.side != @selected_piece.side)
         tile.highlighted = true
         @highlighted_tiles << tile
       else
