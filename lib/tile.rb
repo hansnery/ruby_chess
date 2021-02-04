@@ -15,4 +15,8 @@ class Tile
   def empty?
     @data == '  '
   end
+
+  def not_empty?
+    @data != '  '
+  end
 end

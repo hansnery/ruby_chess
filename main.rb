@@ -57,8 +57,10 @@ class Chess
 
   def try_again(because)
     puts 'Wrong input! Try again!' if because == 'wrong_input'
+    # clear_board if because == 'wrong_input'
     puts 'It\'s white\'s turn!' if because == 'whites_turn'
     puts 'It\'s black\'s turn!' if because == 'blacks_turn'
+    puts 'You picked a piece, now you must move it!' if because == 'picked_piece'
     ask_input
   end
 
@@ -80,16 +82,39 @@ class Chess
 
   def show_possible_moves
     @highlighted_tiles = []
+    # check_for_pawn_diagonals
     @selected_piece.possible_moves.shift if @selected_piece.class == Pawn && @selected_piece.jumped?
     @selected_piece.possible_moves.map do |move|
       tile = find_tile(@target_longitude + move[0], @target_latitude + move[1])
-      if tile.respond_to?(:longitude) && tile.respond_to?(:latitude) && tile.empty? || @selected_piece.class != Pawn
+      if inside_the_board?(tile) && tile.empty? || @selected_piece.class != Pawn
         tile.highlighted = true
         @highlighted_tiles << tile
       else
         try_again('wrong_input')
       end
     end
+  end
+
+  def check_for_pawn_diagonals
+    return unless @selected_piece.class == Pawn
+
+    @selected_piece.diagonal_attack.map do |move|
+      tile = find_tile(@target_longitude + move[0], @target_latitude + move[1])
+      next unless tile.respond_to?(:longitude) && tile.respond_to?(:latitude) && tile.not_empty?
+
+      tile.highlighted = true
+      @highlighted_tiles << tile
+      # if tile.respond_to?(:longitude) && tile.respond_to?(:latitude) && tile.not_empty?
+      #   tile.highlighted = true
+      #   @highlighted_tiles << tile
+      # else
+      #   try_again('wrong_input')
+      # end
+    end
+  end
+
+  def inside_the_board?(tile)
+    return true if tile.respond_to?(:longitude) && tile.respond_to?(:latitude)
   end
 
   def check_destination(input)
@@ -114,12 +139,14 @@ class Chess
     @highlighted_tiles.map do |tile|
       longitude = tile.longitude.to_s
       latitude = tile.latitude.to_s
-      move_piece(letter_to_longitude(longitude), latitude.to_i) if input == longitude + latitude
+      try_again('picked_piece') unless input == longitude + latitude
+      # next unless input == longitude + latitude
+
+      move_piece(letter_to_longitude(longitude), latitude.to_i) #if input == longitude + latitude
       clear_board
       @selected_piece.moved_once = true if @selected_piece.class == Pawn && @selected_piece.moved_once == false
       @moving = false
-      @turn = 'black' if @selected_piece.side == 'white'
-      @turn = 'white' if @selected_piece.side == 'black'
+      change_player
     end
   end
 
@@ -137,6 +164,11 @@ class Chess
     else
       puts 'MOVE TO(BLACK): '
     end
+  end
+
+  def change_player
+    @turn = 'black' if @selected_piece.side == 'white'
+    @turn = 'white' if @selected_piece.side == 'black'
   end
 end
 
