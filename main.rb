@@ -83,7 +83,7 @@ class Chess
     @selected_piece.possible_moves.shift if @selected_piece.class == Pawn && @selected_piece.jumped?
     @selected_piece.possible_moves.map do |move|
       tile = find_tile(@target_longitude + move[0], @target_latitude + move[1])
-      if tile.respond_to?(:longitude) && tile.respond_to?(:latitude)
+      if tile.respond_to?(:longitude) && tile.respond_to?(:latitude) && tile.empty? || @selected_piece.class != Pawn
         tile.highlighted = true
         @highlighted_tiles << tile
       else
