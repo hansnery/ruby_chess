@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 # :nodoc:
+# rubocop:disable Metrics/PerceivedComplexity,Metrics/CyclomaticComplexity,Metrics/AbcSize
 class Chess
   Dir[File.dirname(__FILE__) + '/lib/*.rb'].sort.each { |file| require file }
   require 'colorize'
@@ -56,11 +57,11 @@ class Chess
   end
 
   def try_again(because)
-    puts 'Wrong input! Try again!' if because == 'wrong_input'
-    puts 'It\'s white\'s turn!' if because == 'whites_turn'
-    puts 'It\'s black\'s turn!' if because == 'blacks_turn'
-    puts 'Can\'t move there! Choose another piece.' if because == 'cant_move'
-    puts 'You picked a piece, now you must move it!' if because == 'picked_piece'
+    puts "\nWrong input! Try again!".colorize(color: :yellow) if because == 'wrong_input'
+    puts "\nIt\'s white\'s turn!".colorize(color: :yellow) if because == 'whites_turn'
+    puts "\nIt\'s black\'s turn!".colorize(color: :yellow) if because == 'blacks_turn'
+    puts "\nThis piece can\'t move! Choose another one.".colorize(color: :yellow) if because == 'cant_move'
+    puts "\nCan\'t move to the same place!".colorize(color: :yellow) if because == 'cant_move_to_same_place'
     ask_input
   end
 
@@ -82,7 +83,7 @@ class Chess
 
   def show_possible_moves
     @highlighted_tiles = []
-    # check_for_pawn_diagonals
+    check_for_pawn_diagonals
     @selected_piece.possible_moves.shift if @selected_piece.class == Pawn && @selected_piece.jumped?
     @selected_piece.possible_moves.map do |move|
       tile = find_tile(@target_longitude + move[0], @target_latitude + move[1])
@@ -90,6 +91,8 @@ class Chess
         tile.highlighted = true
         @highlighted_tiles << tile
       else
+        next unless @highlighted_tiles.empty?
+
         clear_board
         try_again('cant_move')
       end
@@ -101,16 +104,10 @@ class Chess
 
     @selected_piece.diagonal_attack.map do |move|
       tile = find_tile(@target_longitude + move[0], @target_latitude + move[1])
-      next unless tile.respond_to?(:longitude) && tile.respond_to?(:latitude) && tile.not_empty?
+      next unless inside_the_board?(tile) && tile.not_empty?
 
       tile.highlighted = true
       @highlighted_tiles << tile
-      # if tile.respond_to?(:longitude) && tile.respond_to?(:latitude) && tile.not_empty?
-      #   tile.highlighted = true
-      #   @highlighted_tiles << tile
-      # else
-      #   try_again('wrong_input')
-      # end
     end
   end
 
@@ -118,8 +115,12 @@ class Chess
     return true if tile.respond_to?(:longitude) && tile.respond_to?(:latitude)
   end
 
+  def same_place?(input)
+    input == number_to_letter(@selected_piece.longitude) + @selected_piece.latitude.to_s
+  end
+
   def check_destination(input)
-    try_again('wrong_input') if input == number_to_letter(@selected_piece.longitude) + @selected_piece.latitude.to_s
+    try_again('cant_move_to_same_place') if same_place?(input)
     check_tile_and_piece
     piece = find_piece(@target_longitude, @target_latitude)
     # p piece
@@ -140,10 +141,11 @@ class Chess
     @highlighted_tiles.map do |tile|
       longitude = tile.longitude.to_s
       latitude = tile.latitude.to_s
-      try_again('picked_piece') unless input == longitude + latitude
-      # next unless input == longitude + latitude
+      # p @highlighted_tiles
+      # puts "\nYou picked a piece, now you must move it!".colorize(color: :yellow) unless input == longitude + latitude
+      next unless input == longitude + latitude
 
-      move_piece(letter_to_longitude(longitude), latitude.to_i) #if input == longitude + latitude
+      move_piece(letter_to_longitude(longitude), latitude.to_i) # if input == longitude + latitude
       clear_board
       @selected_piece.moved_once = true if @selected_piece.class == Pawn && @selected_piece.moved_once == false
       @moving = false
@@ -153,17 +155,17 @@ class Chess
 
   def print_select_piece
     if @turn == 'white'
-      puts 'SELECT PIECE(WHITE): '
+      puts 'SELECT PIECE(WHITE): '.colorize(color: :yellow)
     else
-      puts 'SELECT PIECE(BLACK): '
+      puts 'SELECT PIECE(BLACK): '.colorize(color: :yellow)
     end
   end
 
   def print_move_to
     if @turn == 'white'
-      puts 'MOVE TO(WHITE): '
+      puts 'MOVE TO(WHITE): '.colorize(color: :yellow)
     else
-      puts 'MOVE TO(BLACK): '
+      puts 'MOVE TO(BLACK): '.colorize(color: :yellow)
     end
   end
 
@@ -174,3 +176,5 @@ class Chess
 end
 
 Chess.new
+# rubocop:enable Metrics/PerceivedComplexity,Metrics/CyclomaticComplexity,Metrics/AbcSize
+# EOF
