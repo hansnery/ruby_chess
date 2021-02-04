@@ -103,8 +103,9 @@ class Chess
     return unless @selected_piece.class == Pawn
 
     @selected_piece.diagonal_attack.map do |move|
+      piece = find_piece(@target_longitude + move[0], @target_latitude + move[1])
       tile = find_tile(@target_longitude + move[0], @target_latitude + move[1])
-      next unless inside_the_board?(tile) && tile.not_empty?
+      next unless inside_the_board?(tile) && tile.not_empty? && piece.side != @selected_piece.side
 
       tile.highlighted = true
       @highlighted_tiles << tile
