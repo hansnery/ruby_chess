@@ -57,9 +57,9 @@ class Chess
 
   def try_again(because)
     puts 'Wrong input! Try again!' if because == 'wrong_input'
-    # clear_board if because == 'wrong_input'
     puts 'It\'s white\'s turn!' if because == 'whites_turn'
     puts 'It\'s black\'s turn!' if because == 'blacks_turn'
+    puts 'Can\'t move there! Choose another piece.' if because == 'cant_move'
     puts 'You picked a piece, now you must move it!' if because == 'picked_piece'
     ask_input
   end
@@ -86,11 +86,12 @@ class Chess
     @selected_piece.possible_moves.shift if @selected_piece.class == Pawn && @selected_piece.jumped?
     @selected_piece.possible_moves.map do |move|
       tile = find_tile(@target_longitude + move[0], @target_latitude + move[1])
-      if inside_the_board?(tile) && tile.empty? || @selected_piece.class != Pawn
+      if inside_the_board?(tile) && (tile.empty? || @selected_piece.class != Pawn)
         tile.highlighted = true
         @highlighted_tiles << tile
       else
-        try_again('wrong_input')
+        clear_board
+        try_again('cant_move')
       end
     end
   end
