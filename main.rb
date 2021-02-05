@@ -91,13 +91,16 @@ class Chess
   def show_possible_moves
     @highlighted_tiles = []
     pawn_moves if @selected_piece.instance_of?(Pawn)
-    longitudinal_and_transverse_moves if rook_or_bishop_or_queen?
-    piece_cant_move if @highlighted_tiles.empty? && rook_or_bishop_or_queen?
+    longitudinal_and_transverse_moves if piece_moves_longitudinally_or_transversally?
+    piece_cant_move if @highlighted_tiles.empty? && piece_moves_longitudinally_or_transversally?
     knight_moves if @selected_piece.instance_of?(Knight)
   end
 
-  def rook_or_bishop_or_queen?
-    @selected_piece.instance_of?(Rook) || @selected_piece.instance_of?(Bishop) ||  @selected_piece.instance_of?(Queen)
+  def piece_moves_longitudinally_or_transversally?
+    @selected_piece.instance_of?(Rook) ||
+      @selected_piece.instance_of?(Bishop) ||
+      @selected_piece.instance_of?(Queen) ||
+      @selected_piece.instance_of?(King)
   end
 
   def pawn_moves

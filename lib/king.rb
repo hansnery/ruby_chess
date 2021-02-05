@@ -8,7 +8,7 @@ class King
   def initialize(longitude, latitude, side)
     @longitude = longitude
     @latitude = latitude
-    @possible_moves = [[0, 2], [0, 1]]
+    @possible_moves = [[[0, 1]], [[1, 1]], [[1, 0]], [[1, -1]], [[0, -1]], [[-1, -1]], [[-1, 0]], [[-1, 1]]]
     @side = side
     set_character
   end
