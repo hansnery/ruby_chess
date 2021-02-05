@@ -8,7 +8,7 @@ class Knight
   def initialize(longitude, latitude, side)
     @longitude = longitude
     @latitude = latitude
-    @possible_moves = [[0, 2], [0, 1]]
+    @possible_moves = [[1, 2], [2, 1], [2, -1], [1, -2], [-1, -2], [-2, -1], [-2, 1], [-1, 2]]
     @side = side
     set_character
   end
