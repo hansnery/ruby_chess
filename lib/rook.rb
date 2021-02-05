@@ -8,8 +8,11 @@ class Rook
   def initialize(longitude, latitude, side)
     @longitude = longitude
     @latitude = latitude
-    @possible_moves = [[0, 2], [0, 1]]
     @side = side
+    @possible_moves = [[0, 1], [0, 2], [0, 3], [0, 4], [0, 5], [0, 6], [0, 7],
+                       [1, 0], [2, 0], [3, 0], [4, 0], [5, 0], [6, 0], [7, 0],
+                       [0, -1], [0, -2], [0, -3], [0, -4], [0, -5], [0, -6], [0, -7],
+                       [-1, 0], [-2, 0], [-3, 0], [-4, 0], [-5, 0], [-6, 0], [-7, 0]]
     set_character
   end
 

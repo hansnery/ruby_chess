@@ -69,6 +69,7 @@ class Chess
     target_tile = find_tile(@target_longitude, @target_latitude)
     target_piece = find_piece(@target_longitude, @target_latitude)
     try_again('wrong_input') if target_tile.empty? && @moving == false
+    try_again('wrong_input') if target_tile.highlighted == false  && @moving == true
     return unless target_piece.respond_to?(:side)
 
     try_again('blacks_turn') if target_piece.side == 'white' && @turn != 'white' && @moving == false
@@ -83,12 +84,15 @@ class Chess
 
   def show_possible_moves
     @highlighted_tiles = []
-    check_for_pawn_diagonals
-    @selected_piece.possible_moves.shift if @selected_piece.class == Pawn && @selected_piece.jumped?
+    pawn_moves
+  end
+
+  def pawn_moves
+    check_for_pawn_diagonals if @selected_piece.instance_of?(Pawn)
+    @selected_piece.possible_moves.shift if @selected_piece.instance_of?(Pawn) && @selected_piece.jumped?
     @selected_piece.possible_moves.map do |move|
-      piece = find_piece(@target_longitude + move[0], @target_latitude + move[1])
       tile = find_tile(@target_longitude + move[0], @target_latitude + move[1])
-      if inside_the_board?(tile) && (tile.empty? || @selected_piece.class != Pawn && piece.side != @selected_piece.side)
+      if inside_the_board?(tile) && (tile.empty? || tile.not_empty? && move[1] != 1 && move[1] != -1)
         tile.highlighted = true
         @highlighted_tiles << tile
       else
@@ -101,7 +105,7 @@ class Chess
   end
 
   def check_for_pawn_diagonals
-    return unless @selected_piece.class == Pawn
+    return unless @selected_piece.instance_of?(Pawn)
 
     @selected_piece.diagonal_attack.map do |move|
       piece = find_piece(@target_longitude + move[0], @target_latitude + move[1])
@@ -121,9 +125,7 @@ class Chess
     input == number_to_letter(@selected_piece.longitude) + @selected_piece.latitude.to_s
   end
 
-  def check_destination(input)
-    try_again('cant_move_to_same_place') if same_place?(input)
-    check_tile_and_piece
+  def kill_piece
     piece = find_piece(@target_longitude, @target_latitude)
     # p piece
     return if piece.nil?
@@ -131,6 +133,12 @@ class Chess
     piece.longitude = nil
     piece.latitude = nil
     # p piece
+  end
+
+  def check_destination(input)
+    try_again('cant_move_to_same_place') if same_place?(input)
+    check_tile_and_piece
+    kill_piece
   end
 
   def select_destination
@@ -149,7 +157,7 @@ class Chess
 
       move_piece(letter_to_longitude(longitude), latitude.to_i) # if input == longitude + latitude
       clear_board
-      @selected_piece.moved_once = true if @selected_piece.class == Pawn && @selected_piece.moved_once == false
+      @selected_piece.moved_once = true if @selected_piece.instance_of?(Pawn) && @selected_piece.moved_once == false
       @moving = false
       change_player
     end
