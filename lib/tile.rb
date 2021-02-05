@@ -10,7 +10,6 @@ class Tile
     @latitude = nil
     @selected = false
     @highlighted = false
-    @stop = false
   end
 
   def empty?
@@ -19,9 +18,5 @@ class Tile
 
   def not_empty?
     @data != '  '
-  end
-
-  def not_stopped?
-    @stop == false
   end
 end

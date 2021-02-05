@@ -131,7 +131,6 @@ class Chess
 
         # puts "--Tile--\nData: #{tile.data}\nLongitude: #{tile.longitude}\nLatitude: #{tile.latitude}\n--------"
         tile.highlighted = true
-        tile.stop = true
         @highlighted_tiles << tile
         break
       end
