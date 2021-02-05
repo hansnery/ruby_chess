@@ -139,7 +139,7 @@ module BoardMethods
 
   def white_first_row
     [
-      @white_rook1 = Rook.new(4, 4, 'white'), @white_rook2 = Rook.new(8, 1, 'white'),
+      @white_rook1 = Rook.new(1, 1, 'white'), @white_rook2 = Rook.new(8, 1, 'white'),
       @white_knight1 = Knight.new(2, 1, 'white'), @white_knight2 = Knight.new(7, 1, 'white'),
       @white_bishop1 = Bishop.new(3, 1, 'white'), @white_bishop2 = Bishop.new(6, 1, 'white'),
       @white_king = King.new(5, 1, 'white'), @white_queen = Queen.new(4, 1, 'white')
