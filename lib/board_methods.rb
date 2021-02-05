@@ -154,4 +154,9 @@ module BoardMethods
       @white_pawn7 = Pawn.new(7, 2, 'white'), @white_pawn8 = Pawn.new(8, 2, 'white')
     ]
   end
+
+  def highlight_tile(tile)
+    tile.highlighted = true
+    @highlighted_tiles << tile
+  end
 end

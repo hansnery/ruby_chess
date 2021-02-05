@@ -90,19 +90,14 @@ class Chess
   end
 
   def pawn_moves
-    check_for_pawn_diagonals if @selected_piece.instance_of?(Pawn)
-    @selected_piece.possible_moves.shift if @selected_piece.instance_of?(Pawn) && @selected_piece.jumped?
+    pawn_checks
     @selected_piece.possible_moves.map do |move|
       tile = find_tile(@target_longitude + move[0], @target_latitude + move[1])
-      if inside_the_board?(tile) && (tile.empty? || tile.not_empty? && move[1] != 1 && move[1] != -1)
-        tile.highlighted = true
-        @highlighted_tiles << tile
-      else
-        next unless @highlighted_tiles.empty?
+      highlight_tile(tile) if inside_the_board?(tile) && (tile.empty? || front_of_pawn?(tile, move))
+      next unless @highlighted_tiles.empty?
 
-        clear_board
-        try_again('cant_move')
-      end
+      clear_board
+      try_again('cant_move')
     end
   end
 
@@ -114,9 +109,17 @@ class Chess
       tile = find_tile(@target_longitude + move[0], @target_latitude + move[1])
       next unless inside_the_board?(tile) && tile.not_empty? && piece.side != @selected_piece.side
 
-      tile.highlighted = true
-      @highlighted_tiles << tile
+      highlight_tile(tile)
     end
+  end
+
+  def pawn_checks
+    check_for_pawn_diagonals if @selected_piece.instance_of?(Pawn)
+    @selected_piece.possible_moves.shift if @selected_piece.instance_of?(Pawn) && @selected_piece.jumped?
+  end
+
+  def front_of_pawn?(tile, move)
+    tile.not_empty? && move[1] != 1 && move[1] != -1
   end
 
   def rook_moves
@@ -124,17 +127,11 @@ class Chess
       direction.map do |move|
         piece = find_piece(@target_longitude + move[0], @target_latitude + move[1])
         tile = find_tile(@target_longitude + move[0], @target_latitude + move[1])
-        if inside_the_board?(tile) && tile.empty?
-          tile.highlighted = true
-          @highlighted_tiles << tile
-        end
+        highlight_tile(tile) if inside_the_board?(tile) && tile.empty?
         next unless inside_the_board?(tile) && tile.not_empty?
 
         # puts "--Tile--\nData: #{tile.data}\nLongitude: #{tile.longitude}\nLatitude: #{tile.latitude}\n--------"
-        if piece.side != @selected_piece.side
-          tile.highlighted = true
-          @highlighted_tiles << tile
-        end
+        highlight_tile(tile) if piece.side != @selected_piece.side
         break
       end
     end
