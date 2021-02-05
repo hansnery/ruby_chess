@@ -66,6 +66,11 @@ class Chess
     ask_input
   end
 
+  def piece_cant_move
+    clear_board
+    try_again('cant_move')
+  end
+
   def check_tile_and_piece
     target_tile = find_tile(@target_longitude, @target_latitude)
     target_piece = find_piece(@target_longitude, @target_latitude)
@@ -86,7 +91,7 @@ class Chess
   def show_possible_moves
     @highlighted_tiles = []
     pawn_moves if @selected_piece.instance_of?(Pawn)
-    rook_moves if @selected_piece.instance_of?(Rook)
+    longitudinal_and_transverse_moves if @selected_piece.instance_of?(Rook) || @selected_piece.instance_of?(Bishop)
     knight_moves if @selected_piece.instance_of?(Knight)
   end
 
@@ -97,8 +102,7 @@ class Chess
       highlight_tile(tile) if inside_the_board?(tile) && (tile.empty? || front_of_pawn?(tile, move))
       next unless @highlighted_tiles.empty?
 
-      clear_board
-      try_again('cant_move')
+      piece_cant_move
     end
   end
 
@@ -123,7 +127,7 @@ class Chess
     tile.not_empty? && move[1] != 1 && move[1] != -1
   end
 
-  def rook_moves
+  def longitudinal_and_transverse_moves
     @selected_piece.possible_moves.map do |direction|
       direction.map do |move|
         piece = find_piece(@target_longitude + move[0], @target_latitude + move[1])
@@ -136,6 +140,7 @@ class Chess
         break
       end
     end
+    piece_cant_move if @highlighted_tiles.empty?
   end
 
   def knight_moves
@@ -145,8 +150,7 @@ class Chess
       highlight_tile(tile) if inside_the_board?(tile) && (tile.empty? || piece.side != @selected_piece.side)
       next unless @highlighted_tiles.empty?
 
-      clear_board
-      try_again('cant_move')
+      piece_cant_move
     end
   end
 
