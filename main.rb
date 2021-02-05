@@ -91,8 +91,13 @@ class Chess
   def show_possible_moves
     @highlighted_tiles = []
     pawn_moves if @selected_piece.instance_of?(Pawn)
-    longitudinal_and_transverse_moves if @selected_piece.instance_of?(Rook) || @selected_piece.instance_of?(Bishop)
+    longitudinal_and_transverse_moves if rook_or_bishop?
+    piece_cant_move if @highlighted_tiles.empty? && rook_or_bishop?
     knight_moves if @selected_piece.instance_of?(Knight)
+  end
+
+  def rook_or_bishop?
+    @selected_piece.instance_of?(Rook) || @selected_piece.instance_of?(Bishop)
   end
 
   def pawn_moves
@@ -135,12 +140,10 @@ class Chess
         highlight_tile(tile) if inside_the_board?(tile) && tile.empty?
         next unless inside_the_board?(tile) && tile.not_empty?
 
-        # puts "--Tile--\nData: #{tile.data}\nLongitude: #{tile.longitude}\nLatitude: #{tile.latitude}\n--------"
         highlight_tile(tile) if piece.side != @selected_piece.side
         break
       end
     end
-    piece_cant_move if @highlighted_tiles.empty?
   end
 
   def knight_moves
