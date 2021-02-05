@@ -122,6 +122,7 @@ class Chess
   def rook_moves
     @selected_piece.possible_moves.map do |direction|
       direction.map do |move|
+        piece = find_piece(@target_longitude + move[0], @target_latitude + move[1])
         tile = find_tile(@target_longitude + move[0], @target_latitude + move[1])
         if inside_the_board?(tile) && tile.empty?
           tile.highlighted = true
@@ -130,8 +131,10 @@ class Chess
         next unless inside_the_board?(tile) && tile.not_empty?
 
         # puts "--Tile--\nData: #{tile.data}\nLongitude: #{tile.longitude}\nLatitude: #{tile.latitude}\n--------"
-        tile.highlighted = true
-        @highlighted_tiles << tile
+        if piece.side != @selected_piece.side
+          tile.highlighted = true
+          @highlighted_tiles << tile
+        end
         break
       end
     end
