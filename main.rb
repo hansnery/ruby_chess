@@ -87,6 +87,7 @@ class Chess
     @highlighted_tiles = []
     pawn_moves if @selected_piece.instance_of?(Pawn)
     rook_moves if @selected_piece.instance_of?(Rook)
+    knight_moves if @selected_piece.instance_of?(Knight)
   end
 
   def pawn_moves
@@ -134,6 +135,18 @@ class Chess
         highlight_tile(tile) if piece.side != @selected_piece.side
         break
       end
+    end
+  end
+
+  def knight_moves
+    @selected_piece.possible_moves.map do |move|
+      piece = find_piece(@target_longitude + move[0], @target_latitude + move[1])
+      tile = find_tile(@target_longitude + move[0], @target_latitude + move[1])
+      highlight_tile(tile) if inside_the_board?(tile) && (tile.empty? || piece.side != @selected_piece.side)
+      next unless @highlighted_tiles.empty?
+
+      clear_board
+      try_again('cant_move')
     end
   end
 
