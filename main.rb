@@ -52,6 +52,7 @@ class Chess
       select_destination
     else
       check_move(input)
+      move(input)
       ask_input
     end
   end
@@ -69,7 +70,7 @@ class Chess
     target_tile = find_tile(@target_longitude, @target_latitude)
     target_piece = find_piece(@target_longitude, @target_latitude)
     try_again('wrong_input') if target_tile.empty? && @moving == false
-    try_again('wrong_input') if target_tile.highlighted == false  && @moving == true
+    try_again('wrong_input') if target_tile.highlighted == false && @moving == true
     return unless target_piece.respond_to?(:side)
 
     try_again('blacks_turn') if target_piece.side == 'white' && @turn != 'white' && @moving == false
@@ -84,7 +85,8 @@ class Chess
 
   def show_possible_moves
     @highlighted_tiles = []
-    pawn_moves
+    pawn_moves if @selected_piece.instance_of?(Pawn)
+    rook_moves if @selected_piece.instance_of?(Rook)
   end
 
   def pawn_moves
@@ -117,6 +119,25 @@ class Chess
     end
   end
 
+  def rook_moves
+    @selected_piece.possible_moves.map do |direction|
+      direction.map do |move|
+        tile = find_tile(@target_longitude + move[0], @target_latitude + move[1])
+        if inside_the_board?(tile) && tile.empty?
+          tile.highlighted = true
+          @highlighted_tiles << tile
+        end
+        next unless inside_the_board?(tile) && tile.not_empty?
+
+        # puts "--Tile--\nData: #{tile.data}\nLongitude: #{tile.longitude}\nLatitude: #{tile.latitude}\n--------"
+        tile.highlighted = true
+        tile.stop = true
+        @highlighted_tiles << tile
+        break
+      end
+    end
+  end
+
   def inside_the_board?(tile)
     return true if tile.respond_to?(:longitude) && tile.respond_to?(:latitude)
   end
@@ -135,7 +156,7 @@ class Chess
     # p piece
   end
 
-  def check_destination(input)
+  def check_move(input)
     try_again('cant_move_to_same_place') if same_place?(input)
     check_tile_and_piece
     kill_piece
@@ -146,12 +167,10 @@ class Chess
     ask_input
   end
 
-  def check_move(input)
-    check_destination(input)
+  def move(input)
     @highlighted_tiles.map do |tile|
       longitude = tile.longitude.to_s
       latitude = tile.latitude.to_s
-      # p @highlighted_tiles
       # puts "\nYou picked a piece, now you must move it!".colorize(color: :yellow) unless input == longitude + latitude
       next unless input == longitude + latitude
 
