@@ -3,7 +3,7 @@
 # :nodoc:
 # rubocop:disable Metrics/PerceivedComplexity,Metrics/CyclomaticComplexity,Metrics/AbcSize
 class Chess
-  Dir[File.dirname(__FILE__) + '/lib/*.rb'].sort.each { |file| require file }
+  Dir["#{File.dirname(__FILE__)}/lib/*.rb"].sort.each { |file| require file }
   require 'colorize'
   include BoardMethods
 
@@ -93,6 +93,7 @@ class Chess
     pawn_moves if @selected_piece.instance_of?(Pawn)
     longitudinal_and_transverse_moves if piece_moves_longitudinally_or_transversally?
     piece_cant_move if @highlighted_tiles.empty? && piece_moves_longitudinally_or_transversally?
+    check if @selected_piece.instance_of?(King)
     knight_moves if @selected_piece.instance_of?(Knight)
   end
 
@@ -157,6 +158,40 @@ class Chess
       next unless @highlighted_tiles.empty?
 
       piece_cant_move
+    end
+  end
+
+  def check
+    @pieces.map do |piece|
+      @line_of_sight = []
+      next if piece.side == @selected_piece.side
+
+      if piece.instance_of?(Pawn) || piece.instance_of?(Knight)
+        piece.possible_moves.map do |move|
+          tile = find_tile(piece.longitude + move[0], piece.latitude + move[1])
+          break if !inside_the_board?(tile) || tile.not_empty?
+
+          @line_of_sight << tile
+        end
+        @highlighted_tiles.each_with_index do |tile, idx|
+          @highlighted_tiles.delete_at(idx) if @line_of_sight.include?(tile)
+          tile.highlighted = false if @line_of_sight.include?(tile)
+        end
+      else
+        piece.possible_moves.map do |direction|
+          direction.map do |move|
+            tile = find_tile(piece.longitude + move[0], piece.latitude + move[1])
+            break if !inside_the_board?(tile) || tile.not_empty?
+
+            @line_of_sight << tile
+          end
+          @highlighted_tiles.each_with_index do |tile, idx|
+            @highlighted_tiles.delete_at(idx) if @line_of_sight.include?(tile)
+            tile.highlighted = false if @line_of_sight.include?(tile)
+          end
+        end
+      end
+      # p @line_of_sight
     end
   end
 
