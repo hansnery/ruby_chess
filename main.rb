@@ -93,7 +93,7 @@ class Chess
     pawn_moves if @selected_piece.instance_of?(Pawn)
     longitudinal_and_transverse_moves if piece_moves_longitudinally_or_transversally?
     piece_cant_move if @highlighted_tiles.empty? && piece_moves_longitudinally_or_transversally?
-    check if @selected_piece.instance_of?(King)
+    king_check if @selected_piece.instance_of?(King)
     knight_moves if @selected_piece.instance_of?(Knight)
   end
 
@@ -161,37 +161,46 @@ class Chess
     end
   end
 
-  def check
+  def king_check
     @pieces.map do |piece|
       @line_of_sight = []
       next if piece.side == @selected_piece.side
 
-      if piece.instance_of?(Pawn) || piece.instance_of?(Knight)
-        piece.possible_moves.map do |move|
-          tile = find_tile(piece.longitude + move[0], piece.latitude + move[1])
-          break if !inside_the_board?(tile) || tile.not_empty?
+      king_check_for_pawns(piece)
+      king_check_for_others(piece)
+    end
+  end
 
-          @line_of_sight << tile
-        end
-        @highlighted_tiles.each_with_index do |tile, idx|
-          @highlighted_tiles.delete_at(idx) if @line_of_sight.include?(tile)
-          tile.highlighted = false if @line_of_sight.include?(tile)
-        end
-      else
-        piece.possible_moves.map do |direction|
-          direction.map do |move|
-            tile = find_tile(piece.longitude + move[0], piece.latitude + move[1])
-            break if !inside_the_board?(tile) || tile.not_empty?
+  def king_check_for_pawns(piece)
+    return unless piece.instance_of?(Pawn)
 
-            @line_of_sight << tile
-          end
-          @highlighted_tiles.each_with_index do |tile, idx|
-            @highlighted_tiles.delete_at(idx) if @line_of_sight.include?(tile)
-            tile.highlighted = false if @line_of_sight.include?(tile)
-          end
-        end
+    piece.diagonal_attack.map do |move|
+      tile = find_tile(piece.longitude + move[0], piece.latitude + move[1])
+      break if !inside_the_board?(tile) || tile.not_empty?
+
+      @line_of_sight << tile
+    end
+    clear_highlighted_tiles(@line_of_sight)
+  end
+
+  def king_check_for_others(piece)
+    return if piece.instance_of?(Pawn)
+
+    piece.possible_moves.map do |direction|
+      direction.map do |move|
+        tile = find_tile(piece.longitude + move[0], piece.latitude + move[1])
+        break if !inside_the_board?(tile) || tile.not_empty?
+
+        @line_of_sight << tile
       end
-      # p @line_of_sight
+      clear_highlighted_tiles(@line_of_sight)
+    end
+  end
+
+  def clear_highlighted_tiles(array)
+    @highlighted_tiles.each_with_index do |tile, idx|
+      @highlighted_tiles.delete_at(idx) if array.include?(tile)
+      tile.highlighted = false if array.include?(tile)
     end
   end
 
