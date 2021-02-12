@@ -2,7 +2,7 @@
 
 # :nodoc:
 class Tile
-  attr_accessor :data, :longitude, :latitude, :selected, :highlighted, :stop
+  attr_accessor :data, :longitude, :latitude, :selected, :highlighted
 
   def initialize
     @data = '  '
@@ -18,5 +18,9 @@ class Tile
 
   def not_empty?
     @data != '  '
+  end
+
+  def check?
+    @data == '♔ ' || @data == '♚ '
   end
 end

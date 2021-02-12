@@ -8,7 +8,7 @@ class Chess
   include BoardMethods
 
   def initialize
-    @turn = 'white'
+    @turn = 'black'
     @moving = false
     welcome
     @board = Board.new
@@ -46,15 +46,26 @@ class Chess
 
   def play_round(input)
     if @moving == false
-      check_tile_and_piece
-      select_piece
-      show_possible_moves
-      select_destination
+      playing
     else
-      check_move(input)
-      move(input)
-      ask_input
+      moving(input)
     end
+  end
+
+  def playing
+    check_tile_and_piece
+    select_piece
+    show_possible_moves
+    select_destination
+  end
+
+  def moving(input)
+    check_move(input)
+    move(input)
+    @moving = false
+    change_player
+    check_king
+    ask_input
   end
 
   def try_again(because)
@@ -165,13 +176,11 @@ class Chess
   def king_check
     @line_of_sight = []
     @pieces.map do |piece|
-      # @line_of_sight = []
       next if piece.side == @selected_piece.side || piece.longitude.nil?
 
       king_check_for_pawns(piece)
     end
     @pieces.map do |piece|
-      # @line_of_sight = []
       next if piece.side == @selected_piece.side || piece.longitude.nil? || piece.instance_of?(Pawn)
 
       king_check_for_others(piece)
@@ -196,7 +205,6 @@ class Chess
     piece.possible_moves.map do |direction|
       direction.map do |move|
         tile = find_tile(piece.longitude + move[0], piece.latitude + move[1])
-        # piece_in_los = find_piece(piece.longitude + move[0], piece.latitude + move[1])
         @line_of_sight << tile if @highlighted_tiles.include?(tile)
         break unless inside_the_board?(tile) & tile.empty?
 
@@ -204,6 +212,15 @@ class Chess
       end
       clear_highlighted_tiles(@line_of_sight)
     end
+  end
+
+  def check_king
+    show_possible_moves
+    clear_board
+    @highlighted_tiles.map do |tile|
+      puts "\nCHECK!".colorize(color: :yellow) if tile.check?
+    end
+    @highlighted_tiles = []
   end
 
   def clear_highlighted_tiles(array)
@@ -249,11 +266,9 @@ class Chess
       # puts "\nYou picked a piece, now you must move it!".colorize(color: :yellow) unless input == longitude + latitude
       next unless input == longitude + latitude
 
-      move_piece(letter_to_longitude(longitude), latitude.to_i) # if input == longitude + latitude
+      move_piece(letter_to_longitude(longitude), latitude.to_i)
       clear_board
       @selected_piece.moved_once = true if @selected_piece.instance_of?(Pawn) && @selected_piece.moved_once == false
-      @moving = false
-      change_player
     end
   end
 
