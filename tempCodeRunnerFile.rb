@@ -1,1 +1,1 @@
-tile
+king_check_for_others

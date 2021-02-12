@@ -163,11 +163,17 @@ class Chess
   end
 
   def king_check
+    @line_of_sight = []
     @pieces.map do |piece|
-      @line_of_sight = []
+      # @line_of_sight = []
       next if piece.side == @selected_piece.side || piece.longitude.nil?
 
       king_check_for_pawns(piece)
+    end
+    @pieces.map do |piece|
+      # @line_of_sight = []
+      next if piece.side == @selected_piece.side || piece.longitude.nil? || piece.instance_of?(Pawn)
+
       king_check_for_others(piece)
     end
   end
@@ -190,7 +196,9 @@ class Chess
     piece.possible_moves.map do |direction|
       direction.map do |move|
         tile = find_tile(piece.longitude + move[0], piece.latitude + move[1])
-        break if !inside_the_board?(tile) || tile.not_empty?
+        # piece_in_los = find_piece(piece.longitude + move[0], piece.latitude + move[1])
+        @line_of_sight << tile if @highlighted_tiles.include?(tile)
+        break unless inside_the_board?(tile) & tile.empty?
 
         @line_of_sight << tile
       end
