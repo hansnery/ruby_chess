@@ -8,7 +8,7 @@ class Chess
   include BoardMethods
 
   def initialize
-    @turn = 'white'
+    @turn = 'black'
     @moving = false
     welcome
     @board = Board.new
@@ -93,8 +93,8 @@ class Chess
     pawn_moves if @selected_piece.instance_of?(Pawn)
     longitudinal_and_transverse_moves if piece_moves_longitudinally_or_transversally?
     piece_cant_move if @highlighted_tiles.empty? && piece_moves_longitudinally_or_transversally?
-    king_check if @selected_piece.instance_of?(King)
     knight_moves if @selected_piece.instance_of?(Knight)
+    king_check if @selected_piece.instance_of?(King)
   end
 
   def piece_moves_longitudinally_or_transversally?
@@ -116,8 +116,6 @@ class Chess
   end
 
   def check_for_pawn_diagonals
-    return unless @selected_piece.instance_of?(Pawn)
-
     @selected_piece.diagonal_attack.map do |move|
       piece = find_piece(@target_longitude + move[0], @target_latitude + move[1])
       tile = find_tile(@target_longitude + move[0], @target_latitude + move[1])
@@ -128,8 +126,11 @@ class Chess
   end
 
   def pawn_checks
-    check_for_pawn_diagonals if @selected_piece.instance_of?(Pawn)
-    @selected_piece.possible_moves.shift if @selected_piece.instance_of?(Pawn) && @selected_piece.jumped?
+    check_for_pawn_diagonals
+    @selected_piece.possible_moves.map do |move|
+      tile = find_tile(@target_longitude + move[0], @target_latitude + move[1])
+      @selected_piece.possible_moves.shift if @selected_piece.jumped? || tile.not_empty?
+    end
   end
 
   def front_of_pawn?(tile, move)
@@ -176,7 +177,7 @@ class Chess
 
     piece.diagonal_attack.map do |move|
       tile = find_tile(piece.longitude + move[0], piece.latitude + move[1])
-      break if !inside_the_board?(tile) || tile.not_empty?
+      break unless inside_the_board?(tile)
 
       @line_of_sight << tile
     end
