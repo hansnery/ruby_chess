@@ -8,7 +8,7 @@ class Chess
   include BoardMethods
 
   def initialize
-    @turn = 'black'
+    @turn = 'white'
     @moving = false
     welcome
     @board = Board.new
@@ -165,7 +165,7 @@ class Chess
   def king_check
     @pieces.map do |piece|
       @line_of_sight = []
-      next if piece.side == @selected_piece.side
+      next if piece.side == @selected_piece.side || piece.longitude.nil?
 
       king_check_for_pawns(piece)
       king_check_for_others(piece)
