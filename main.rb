@@ -63,7 +63,7 @@ class Chess
   def moving(input)
     check_move(input)
     move(input)
-    check_king
+    check_king_message
     change_player
     @moving = false
     # @moving = false if @check == false
@@ -176,35 +176,27 @@ class Chess
 
   def king_check
     @line_of_sight = []
-    # @pieces.map do |piece|
-    #   next if piece.side == @selected_piece.side || piece.longitude.nil?
-
-    #   king_check_for_pawns(piece)
-    #   clear_highlighted_tiles(@line_of_sight)
-    # end
-    # @pieces.map do |piece|
-    #   next if piece.side == @selected_piece.side || piece.longitude.nil? || piece.instance_of?(Pawn)
-
-    #   king_check_for_others(piece)
-    #   clear_highlighted_tiles(@line_of_sight)
-    # end
+    king_check_for_pawns
     @pieces.map do |piece|
-      next if piece.side == @selected_piece.side || piece.longitude.nil?
+      next if piece.side == @selected_piece.side || piece.longitude.nil? || piece.instance_of?(Pawn)
 
-      king_check_for_pawns(piece)
       king_check_for_others(piece)
       clear_highlighted_tiles(@line_of_sight)
     end
   end
 
-  def king_check_for_pawns(piece)
-    return unless piece.instance_of?(Pawn)
+  def king_check_for_pawns
+    @pieces.map do |piece|
+      next if piece.side == @selected_piece.side || piece.longitude.nil?
+      break unless piece.instance_of?(Pawn)
 
-    piece.diagonal_attack.map do |move|
-      tile = find_tile(piece.longitude + move[0], piece.latitude + move[1])
-      break unless inside_the_board?(tile)
+      piece.diagonal_attack.map do |move|
+        tile = find_tile(piece.longitude + move[0], piece.latitude + move[1])
+        break unless inside_the_board?(tile)
 
-      @line_of_sight << tile
+        @line_of_sight << tile
+      end
+      clear_highlighted_tiles(@line_of_sight)
     end
   end
 
@@ -222,7 +214,7 @@ class Chess
     end
   end
 
-  def check_king
+  def check_king_message
     show_possible_moves
     clear_board
     @highlighted_tiles.map do |tile|
