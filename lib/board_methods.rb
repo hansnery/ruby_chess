@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 # :nodoc:
+# rubocop:disable Metrics/AbcSize
 module BoardMethods
   def letter_to_longitude(input_letter)
     board_letters = ('a'..'h').to_a
@@ -163,3 +164,5 @@ module BoardMethods
     @highlighted_tiles << tile
   end
 end
+# rubocop:enable Metrics/AbcSize
+# EOF
