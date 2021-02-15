@@ -9,7 +9,7 @@ class Chess
 
   def initialize
     @check = false
-    @turn = 'white'
+    @turn = 'black'
     @moving = false
     welcome
     @board = Board.new
@@ -176,15 +176,22 @@ class Chess
 
   def king_check
     @line_of_sight = []
+    # @pieces.map do |piece|
+    #   next if piece.side == @selected_piece.side || piece.longitude.nil?
+
+    #   king_check_for_pawns(piece)
+    #   clear_highlighted_tiles(@line_of_sight)
+    # end
+    # @pieces.map do |piece|
+    #   next if piece.side == @selected_piece.side || piece.longitude.nil? || piece.instance_of?(Pawn)
+
+    #   king_check_for_others(piece)
+    #   clear_highlighted_tiles(@line_of_sight)
+    # end
     @pieces.map do |piece|
       next if piece.side == @selected_piece.side || piece.longitude.nil?
 
       king_check_for_pawns(piece)
-      clear_highlighted_tiles(@line_of_sight)
-    end
-    @pieces.map do |piece|
-      next if piece.side == @selected_piece.side || piece.longitude.nil? || piece.instance_of?(Pawn)
-
       king_check_for_others(piece)
       clear_highlighted_tiles(@line_of_sight)
     end
