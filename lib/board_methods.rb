@@ -30,6 +30,7 @@ module BoardMethods
     @selected_piece.longitude = new_longitude
     @selected_piece.latitude = new_latitude
     @board.rows[8 - new_latitude][new_longitude - 1].data = @selected_piece.data
+    @board.rows[8 - new_latitude][new_longitude - 1].side = @selected_piece.side
   end
 
   def target_coordinate(longitude, latitude, distance = [])
@@ -54,6 +55,7 @@ module BoardMethods
 
   def empty_tile
     @selected_tile.data = '  '
+    @selected_tile.side = nil
   end
 
   def clear_board
@@ -122,7 +124,7 @@ module BoardMethods
 
   def black_first_row
     [
-      @black_rook1 = Rook.new('a', 5, 'black'), @black_rook2 = Rook.new('h', 8, 'black'),
+      @black_rook1 = Rook.new('a', 8, 'black'), @black_rook2 = Rook.new('h', 8, 'black'),
       @black_knight1 = Knight.new('b', 8, 'black'), @black_knight2 = Knight.new('g', 8, 'black'),
       @black_bishop1 = Bishop.new('c', 8, 'black'), @black_bishop2 = Bishop.new('f', 8, 'black'),
       @black_king = King.new('e', 8, 'black'), @black_queen = Queen.new('d', 8, 'black')
@@ -133,7 +135,7 @@ module BoardMethods
     [
       @black_pawn1 = Pawn.new('a', 7, 'black'), @black_pawn2 = Pawn.new('b', 7, 'black'),
       @black_pawn3 = Pawn.new('c', 7, 'black'), @black_pawn4 = Pawn.new('d', 7, 'black'),
-      @black_pawn5 = Pawn.new('e', 7, 'black'), @black_pawn6 = Pawn.new('f', 5, 'black'),
+      @black_pawn5 = Pawn.new('e', 7, 'black'), @black_pawn6 = Pawn.new('f', 7, 'black'),
       @black_pawn7 = Pawn.new('g', 7, 'black'), @black_pawn8 = Pawn.new('h', 7, 'black')
     ]
   end
@@ -143,7 +145,7 @@ module BoardMethods
       @white_rook1 = Rook.new('a', 1, 'white'), @white_rook2 = Rook.new('h', 1, 'white'),
       @white_knight1 = Knight.new('b', 1, 'white'), @white_knight2 = Knight.new('g', 1, 'white'),
       @white_bishop1 = Bishop.new('c', 1, 'white'), @white_bishop2 = Bishop.new('f', 1, 'white'),
-      @white_king = King.new('e', 4, 'white'), @white_queen = Queen.new('d', 1, 'white')
+      @white_king = King.new('e', 1, 'white'), @white_queen = Queen.new('d', 1, 'white')
     ]
   end
 
@@ -151,7 +153,7 @@ module BoardMethods
     [
       @white_pawn1 = Pawn.new('a', 2, 'white'), @white_pawn2 = Pawn.new('b', 2, 'white'),
       @white_pawn3 = Pawn.new('c', 2, 'white'), @white_pawn4 = Pawn.new('d', 2, 'white'),
-      @white_pawn5 = Pawn.new('e', 2, 'white'), @white_pawn6 = Pawn.new('f', 2, 'white'),
+      @white_pawn5 = Pawn.new('e', 4, 'white'), @white_pawn6 = Pawn.new('f', 2, 'white'),
       @white_pawn7 = Pawn.new('g', 2, 'white'), @white_pawn8 = Pawn.new('h', 2, 'white')
     ]
   end

@@ -9,7 +9,7 @@ class Chess
 
   def initialize
     @check = false
-    @turn = 'white'
+    @turn = 'black'
     @moving = false
     welcome
     @board = Board.new
@@ -104,17 +104,18 @@ class Chess
   def show_possible_moves
     @highlighted_tiles = []
     pawn_moves if @selected_piece.instance_of?(Pawn)
-    longitudinal_and_transverse_moves if piece_moves_longitudinally_or_transversally?
-    piece_cant_move if @highlighted_tiles.empty? && piece_moves_longitudinally_or_transversally?
+    piece_cant_move if @selected_piece.instance_of?(Pawn) && @highlighted_tiles.empty? && @moving == false
+    longitudinal_and_transverse_moves if piece_moves_longitudinally_or_transversally?(@selected_piece)
+    piece_cant_move if @highlighted_tiles.empty? && piece_moves_longitudinally_or_transversally?(@selected_piece)
     knight_moves if @selected_piece.instance_of?(Knight)
     king_check if @selected_piece.instance_of?(King)
   end
 
-  def piece_moves_longitudinally_or_transversally?
-    @selected_piece.instance_of?(Rook) ||
-      @selected_piece.instance_of?(Bishop) ||
-      @selected_piece.instance_of?(Queen) ||
-      @selected_piece.instance_of?(King)
+  def piece_moves_longitudinally_or_transversally?(piece)
+    piece.instance_of?(Rook) ||
+      piece.instance_of?(Bishop) ||
+      piece.instance_of?(Queen) ||
+      piece.instance_of?(King)
   end
 
   def pawn_moves
@@ -122,9 +123,6 @@ class Chess
     @selected_piece.possible_moves.map do |move|
       tile = find_tile(@target_longitude + move[0], @target_latitude + move[1])
       highlight_tile(tile) if inside_the_board?(tile) && (tile.empty? || front_of_pawn?(tile, move))
-      next unless @highlighted_tiles.empty?
-
-      piece_cant_move
     end
   end
 
@@ -202,13 +200,13 @@ class Chess
   end
 
   def king_check_for_others(piece)
-    return if piece.instance_of?(Pawn)
-
     piece.possible_moves.map do |direction|
       direction.map do |move|
         tile = find_tile(piece.longitude + move[0], piece.latitude + move[1])
+        target_piece = find_piece(letter_to_number(tile.longitude), tile.latitude) if tile.instance_of?(Tile)
         @line_of_sight << tile if @highlighted_tiles.include?(tile)
-        break unless inside_the_board?(tile) & tile.empty?
+        next if target_piece.instance_of?(King) && target_piece.side != piece.side
+        break unless inside_the_board?(tile) && tile.empty?
 
         @line_of_sight << tile
       end
