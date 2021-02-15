@@ -185,6 +185,7 @@ class Chess
 
       king_check_for_others(piece)
     end
+    clear_highlighted_tiles(@line_of_sight)
   end
 
   def king_check_for_pawns(piece)
@@ -196,7 +197,6 @@ class Chess
 
       @line_of_sight << tile
     end
-    clear_highlighted_tiles(@line_of_sight)
   end
 
   def king_check_for_others(piece)
@@ -210,7 +210,6 @@ class Chess
 
         @line_of_sight << tile
       end
-      clear_highlighted_tiles(@line_of_sight)
     end
   end
 
