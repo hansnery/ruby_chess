@@ -266,7 +266,6 @@ class Chess
     @highlighted_tiles.map do |tile|
       longitude = tile.longitude.to_s
       latitude = tile.latitude.to_s
-      # puts "\nYou picked a piece, now you must move it!".colorize(color: :yellow) unless input == longitude + latitude
       next unless input == longitude + latitude
 
       move_piece(letter_to_longitude(longitude), latitude.to_i)
