@@ -9,7 +9,7 @@ class Chess
 
   def initialize
     @check = false
-    @turn = 'black'
+    @turn = 'white'
     @moving = false
     welcome
     @board = Board.new
@@ -65,8 +65,9 @@ class Chess
     move(input)
     check_king
     change_player
-    @moving = false if @check == false
-    select_king if @check == true
+    @moving = false
+    # @moving = false if @check == false
+    # select_king if @check == true
     ask_input
   end
 
@@ -179,13 +180,14 @@ class Chess
       next if piece.side == @selected_piece.side || piece.longitude.nil?
 
       king_check_for_pawns(piece)
+      clear_highlighted_tiles(@line_of_sight)
     end
     @pieces.map do |piece|
       next if piece.side == @selected_piece.side || piece.longitude.nil? || piece.instance_of?(Pawn)
 
       king_check_for_others(piece)
+      clear_highlighted_tiles(@line_of_sight)
     end
-    clear_highlighted_tiles(@line_of_sight)
   end
 
   def king_check_for_pawns(piece)
@@ -271,18 +273,18 @@ class Chess
     end
   end
 
-  def select_king
-    side = 'black' if @turn == 'black'
-    side = 'white' if @turn == 'white'
-    @pieces.map do |piece|
-      select_piece(piece.longitude, piece.latitude) if piece.instance_of?(King) && piece.side == side
-    end
-    @check = false
-    @target_longitude = @selected_piece.longitude
-    @target_latitude = @selected_piece.latitude
-    show_possible_moves
-    select_destination
-  end
+  # def select_king
+  #   side = 'black' if @turn == 'black'
+  #   side = 'white' if @turn == 'white'
+  #   @pieces.map do |piece|
+  #     select_piece(piece.longitude, piece.latitude) if piece.instance_of?(King) && piece.side == side
+  #   end
+  #   @check = false
+  #   @target_longitude = @selected_piece.longitude
+  #   @target_latitude = @selected_piece.latitude
+  #   show_possible_moves
+  #   select_destination
+  # end
 
   def print_select_piece
     if @turn == 'white'

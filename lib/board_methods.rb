@@ -136,7 +136,7 @@ module BoardMethods
     [
       @black_pawn1 = Pawn.new('a', 7, 'black'), @black_pawn2 = Pawn.new('b', 7, 'black'),
       @black_pawn3 = Pawn.new('c', 7, 'black'), @black_pawn4 = Pawn.new('d', 7, 'black'),
-      @black_pawn5 = Pawn.new('e', 7, 'black'), @black_pawn6 = Pawn.new('f', 7, 'black'),
+      @black_pawn5 = Pawn.new('e', 5, 'black'), @black_pawn6 = Pawn.new('f', 7, 'black'),
       @black_pawn7 = Pawn.new('g', 7, 'black'), @black_pawn8 = Pawn.new('h', 7, 'black')
     ]
   end
