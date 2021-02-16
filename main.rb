@@ -9,7 +9,7 @@ class Chess
 
   def initialize
     @check = false
-    @turn = 'white'
+    @turn = 'black'
     @moving = false
     welcome
     @board = Board.new
@@ -169,9 +169,6 @@ class Chess
       piece = find_piece(@target_longitude + move[0], @target_latitude + move[1])
       tile = find_tile(@target_longitude + move[0], @target_latitude + move[1])
       highlight_tile(tile) if inside_the_board?(tile) && (tile.empty? || piece.side != @selected_piece.side)
-      next unless @highlighted_tiles.empty?
-
-      piece_cant_move
     end
   end
 
