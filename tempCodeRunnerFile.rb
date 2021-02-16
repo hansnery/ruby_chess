@@ -1,1 +1,1 @@
-class Chess
+pawn_checks

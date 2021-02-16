@@ -9,7 +9,7 @@ class Chess
 
   def initialize
     @check = false
-    @turn = 'black'
+    @turn = 'white'
     @moving = false
     welcome
     @board = Board.new
@@ -109,6 +109,7 @@ class Chess
     longitudinal_and_transverse_moves if piece_moves_longitudinally_or_transversally?(@selected_piece)
     piece_cant_move if @highlighted_tiles.empty? && piece_moves_longitudinally_or_transversally?(@selected_piece)
     knight_moves if @selected_piece.instance_of?(Knight)
+    @line_of_sight = [] if @selected_piece.instance_of?(King)
     king_check if @selected_piece.instance_of?(King)
   end
 
@@ -175,8 +176,12 @@ class Chess
   end
 
   def king_check
-    @line_of_sight = []
-    king_check_for_pawns
+    @pieces.map do |piece|
+      next if piece.side == @selected_piece.side || piece.longitude.nil?
+
+      king_check_for_pawns(piece)
+      clear_highlighted_tiles(@line_of_sight)
+    end
     @pieces.map do |piece|
       next if piece.side == @selected_piece.side || piece.longitude.nil? || piece.instance_of?(Pawn)
 
@@ -185,18 +190,14 @@ class Chess
     end
   end
 
-  def king_check_for_pawns
-    @pieces.map do |piece|
-      next if piece.side == @selected_piece.side || piece.longitude.nil?
-      break unless piece.instance_of?(Pawn)
+  def king_check_for_pawns(piece)
+    return unless piece.instance_of?(Pawn)
 
-      piece.diagonal_attack.map do |move|
-        tile = find_tile(piece.longitude + move[0], piece.latitude + move[1])
-        break unless inside_the_board?(tile)
+    piece.diagonal_attack.map do |move|
+      tile = find_tile(piece.longitude + move[0], piece.latitude + move[1])
+      break unless inside_the_board?(tile)
 
-        @line_of_sight << tile
-      end
-      clear_highlighted_tiles(@line_of_sight)
+      @line_of_sight << tile
     end
   end
 
