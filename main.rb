@@ -216,6 +216,7 @@ class Chess
     show_possible_moves
     clear_board
     @highlighted_tiles.map do |tile|
+      p tile
       puts "\nCHECK!".colorize(color: :yellow) if tile.check?
       @check = true if tile.check?
     end
@@ -284,6 +285,7 @@ class Chess
   # end
 
   def print_select_piece
+    puts "\nCheck: #{@check}\nTurn: #{@turn}"
     if @turn == 'white'
       puts 'SELECT PIECE(WHITE): '.colorize(color: :yellow)
     else
@@ -292,6 +294,7 @@ class Chess
   end
 
   def print_move_to
+    puts "\nCheck: #{@check}\nTurn: #{@turn}"
     if @turn == 'white'
       puts 'MOVE TO(WHITE): '.colorize(color: :yellow)
     else
