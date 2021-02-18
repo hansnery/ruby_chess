@@ -62,8 +62,6 @@ class Chess
 
   def moving(input)
     check_move(input)
-    # check_king_message2 if @check == true
-    # check_king_message
     move(input)
     check_king_message
     change_player
@@ -214,26 +212,6 @@ class Chess
       end
     end
   end
-
-  # def check_king_message2
-  #   @pieces.map do |piece|
-  #     next if piece.side == @turn && @check == true
-
-  #     select_piece(piece.longitude, piece.longitude)
-  #     show_possible_moves
-  #     clear_board
-  #     @highlighted_tiles.map do |tile|
-  #       break if tile.check? && @check == true
-  #       next unless tile.check?
-
-  #       puts "\nCHECK!".colorize(color: :yellow) if @check == false
-  #       @check = true if piece.side == @turn && @check == false
-  #     end
-  #     select_piece(@target_longitude, @target_latitude)
-  #     @highlighted_tiles = []
-  #     clear_board
-  #   end
-  # end
 
   def check_king_message
     @pieces.map do |piece|
