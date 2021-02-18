@@ -62,6 +62,8 @@ class Chess
 
   def moving(input)
     check_move(input)
+    # check_king_message2 if @check == true
+    # check_king_message
     move(input)
     check_king_message
     change_player
@@ -77,6 +79,7 @@ class Chess
     puts "\nIt\'s black\'s turn!".colorize(color: :yellow) if because == 'blacks_turn'
     puts "\nThis piece can\'t move! Choose another one.".colorize(color: :yellow) if because == 'cant_move'
     puts "\nCan\'t move to the same place!".colorize(color: :yellow) if because == 'cant_move_to_same_place'
+    puts "\nKing is still in check! Try another move.".colorize(color: :yellow) if because == 'king_still_in_check'
     ask_input
   end
 
@@ -212,15 +215,47 @@ class Chess
     end
   end
 
+  # def check_king_message2
+  #   @pieces.map do |piece|
+  #     next if piece.side == @turn && @check == true
+
+  #     select_piece(piece.longitude, piece.longitude)
+  #     show_possible_moves
+  #     clear_board
+  #     @highlighted_tiles.map do |tile|
+  #       break if tile.check? && @check == true
+  #       next unless tile.check?
+
+  #       puts "\nCHECK!".colorize(color: :yellow) if @check == false
+  #       @check = true if piece.side == @turn && @check == false
+  #     end
+  #     select_piece(@target_longitude, @target_latitude)
+  #     @highlighted_tiles = []
+  #     clear_board
+  #   end
+  # end
+
   def check_king_message
-    show_possible_moves
-    clear_board
-    @highlighted_tiles.map do |tile|
-      p tile
-      puts "\nCHECK!".colorize(color: :yellow) if tile.check?
-      @check = true if tile.check?
+    @pieces.map do |piece|
+      next if piece.side != @turn && @check == false
+      next if piece.side == @turn && @check == true
+
+      select_piece(piece.longitude, piece.longitude)
+      show_possible_moves
+      clear_board
+      @highlighted_tiles.map do |tile|
+        break if tile.check? && @check == true
+        next unless tile.check?
+
+        puts "\nCHECK!".colorize(color: :yellow) if @check == false
+        @check = true if piece.side == @turn && @check == false
+      end
+      select_piece(@target_longitude, @target_latitude)
+      p @selected_piece
+      @highlighted_tiles = []
+      clear_board
+      # p @selected_piece
     end
-    @highlighted_tiles = []
   end
 
   def clear_highlighted_tiles(array)
@@ -249,7 +284,10 @@ class Chess
   end
 
   def check_move(input)
+    p @target_longitude
+    p @target_latitude
     try_again('cant_move_to_same_place') if same_place?(input)
+    try_again('king_still_in_check') if @check == true
     check_tile_and_piece
     kill_piece
   end
