@@ -1,2 +1,2 @@
-@highlighted_tiles = []
-    clear_board
+
+      # next if piece.side == @turn && @check == true

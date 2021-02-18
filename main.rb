@@ -63,7 +63,7 @@ class Chess
   def moving(input)
     check_move(input)
     move(input)
-    check_king_message
+    check_king_message if @check == false
     change_player
     @moving = false
     # @moving = false if @check == false
@@ -104,6 +104,7 @@ class Chess
   end
 
   def show_possible_moves
+    puts "@checking_king: #{@checking_king.data}(#{@checking_king.longitude},#{@checking_king.latitude})" unless @checking_king.nil?
     @highlighted_tiles = []
     pawn_moves if @selected_piece.instance_of?(Pawn)
     piece_cant_move if @selected_piece.instance_of?(Pawn) && @highlighted_tiles.empty? && @moving == false
@@ -215,6 +216,7 @@ class Chess
 
   def check_king_message
     @pieces.map do |piece|
+      break if @check == true
       next if piece.side != @turn && @check == false
       next if piece.side == @turn && @check == true
 
@@ -223,16 +225,37 @@ class Chess
       clear_board
       @highlighted_tiles.map do |tile|
         break if tile.check? && @check == true
+        next if piece.side == @turn && @check == true
         next unless tile.check?
 
         puts "\nCHECK!".colorize(color: :yellow) if @check == false
         @check = true if piece.side == @turn && @check == false
       end
+      # p @highlighted_tiles
       select_piece(@target_longitude, @target_latitude)
-      p @selected_piece
+      @checking_king = @selected_piece
+      puts "check_king_message: #{@selected_piece.data}(#{@selected_piece.longitude},#{@selected_piece.latitude})"
+      @line_of_sight = @highlighted_tiles
       @highlighted_tiles = []
       clear_board
-      # p @selected_piece
+    end
+  end
+
+  def check_for_check
+    tile_to_move = find_tile(@target_longitude, @target_latitude)
+    @line_of_sight = [] if @line_of_sight.nil?
+    @line_of_sight.map do |tile|
+      @king_in_danger = tile if tile.check?
+      break if tile.check?
+    end
+    if @check == true && @line_of_sight.include?(tile_to_move) && tile_to_move.latitude == @king_in_danger.latitude
+      puts "\nCheck false!"
+      @check = false
+      @line_of_sight = []
+    elsif @check == true && !@line_of_sight.include?(tile_to_move) && @turn == @king_in_danger.side
+      @moving = false
+      clear_board
+      try_again('king_still_in_check')
     end
   end
 
@@ -262,10 +285,8 @@ class Chess
   end
 
   def check_move(input)
-    p @target_longitude
-    p @target_latitude
+    check_for_check if @check == true
     try_again('cant_move_to_same_place') if same_place?(input)
-    try_again('king_still_in_check') if @check == true
     check_tile_and_piece
     kill_piece
   end
