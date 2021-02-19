@@ -126,10 +126,10 @@ module BoardMethods
 
   def black_first_row
     [
-      @black_rook1 = Rook.new('a', 5, 'black'), @black_rook2 = Rook.new('h', 8, 'black'),
+      @black_rook1 = Rook.new('a', 5, 'black'), @black_rook2 = Rook.new('a', 6, 'black'),
       @black_knight1 = Knight.new('b', 8, 'black'), @black_knight2 = Knight.new('g', 8, 'black'),
       @black_bishop1 = Bishop.new('c', 8, 'black'), @black_bishop2 = Bishop.new('f', 8, 'black'),
-      @black_king = King.new('e', 8, 'black'), @black_queen = Queen.new('d', 8, 'black')
+      @black_king = King.new('f', 5, 'black'), @black_queen = Queen.new('g', 4, 'black')
     ]
   end
 
@@ -147,7 +147,7 @@ module BoardMethods
       @white_rook1 = Rook.new('a', 1, 'white'), @white_rook2 = Rook.new('h', 1, 'white'),
       @white_knight1 = Knight.new('b', 1, 'white'), @white_knight2 = Knight.new('g', 1, 'white'),
       @white_bishop1 = Bishop.new('c', 1, 'white'), @white_bishop2 = Bishop.new('f', 1, 'white'),
-      @white_king = King.new('e', 4, 'white'), @white_queen = Queen.new('d', 1, 'white')
+      @white_king = King.new('h', 4, 'white'), @white_queen = Queen.new('d', 1, 'white')
     ]
   end
 

@@ -1,2 +1,1 @@
-
-      # next if piece.side == @turn && @check == true
+        p target_piece

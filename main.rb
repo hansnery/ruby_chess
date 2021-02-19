@@ -9,7 +9,7 @@ class Chess
 
   def initialize
     @check = false
-    @turn = 'black'
+    @turn = 'white'
     @moving = false
     welcome
     @board = Board.new
@@ -63,7 +63,7 @@ class Chess
   def moving(input)
     check_move(input)
     move(input)
-    check_king_message if @check == false
+    check_kings_safety
     change_player
     @moving = false
     # @moving = false if @check == false
@@ -104,7 +104,6 @@ class Chess
   end
 
   def show_possible_moves
-    puts "@checking_king: #{@checking_king.data}(#{@checking_king.longitude},#{@checking_king.latitude})" unless @checking_king.nil?
     @highlighted_tiles = []
     pawn_moves if @selected_piece.instance_of?(Pawn)
     piece_cant_move if @selected_piece.instance_of?(Pawn) && @highlighted_tiles.empty? && @moving == false
@@ -113,6 +112,7 @@ class Chess
     knight_moves if @selected_piece.instance_of?(Knight)
     @line_of_sight = [] if @selected_piece.instance_of?(King)
     king_check if @selected_piece.instance_of?(King)
+    check_for_surrounding_king(@selected_piece) if @selected_piece.instance_of?(King)
   end
 
   def piece_moves_longitudinally_or_transversally?(piece)
@@ -176,7 +176,7 @@ class Chess
 
   def king_check
     @pieces.map do |piece|
-      next if piece.side == @selected_piece.side || piece.longitude.nil?
+      next if piece.side == @selected_piece.side || piece.longitude.nil? || !piece.instance_of?(Pawn)
 
       king_check_for_pawns(piece)
       clear_highlighted_tiles(@line_of_sight)
@@ -184,6 +184,7 @@ class Chess
     @pieces.map do |piece|
       next if piece.side == @selected_piece.side || piece.longitude.nil? || piece.instance_of?(Pawn)
 
+      # p piece
       king_check_for_others(piece)
       clear_highlighted_tiles(@line_of_sight)
     end
@@ -214,49 +215,93 @@ class Chess
     end
   end
 
-  def check_king_message
-    @pieces.map do |piece|
+  def check_kings_safety
+    @check = false
+    check_for_check(@white_king)
+    check_for_check(@black_king)
+  end
+
+  def check_for_check(king)
+    check_kings_surroundings(king)
+    check_kings_line_of_sight(king)
+  end
+
+  def check_kings_surroundings(king)
+    possible_moves = king.possible_moves.flatten(1)
+    possible_moves.map do |move|
+      piece = find_piece(king.longitude + move[0], king.latitude + move[1])
+      next if piece.nil? || piece.side == king.side
+
+      @check = check_for_surrounding_pawns(piece, king)
+      display_check_message if @check == false
       break if @check == true
-      next if piece.side != @turn && @check == false
-      next if piece.side == @turn && @check == true
-
-      select_piece(piece.longitude, piece.longitude)
-      show_possible_moves
-      clear_board
-      @highlighted_tiles.map do |tile|
-        break if tile.check? && @check == true
-        next if piece.side == @turn && @check == true
-        next unless tile.check?
-
-        puts "\nCHECK!".colorize(color: :yellow) if @check == false
-        @check = true if piece.side == @turn && @check == false
-      end
-      # p @highlighted_tiles
-      select_piece(@target_longitude, @target_latitude)
-      @checking_king = @selected_piece
-      puts "check_king_message: #{@selected_piece.data}(#{@selected_piece.longitude},#{@selected_piece.latitude})"
-      @line_of_sight = @highlighted_tiles
-      @highlighted_tiles = []
-      clear_board
     end
   end
 
-  def check_for_check
-    tile_to_move = find_tile(@target_longitude, @target_latitude)
-    @line_of_sight = [] if @line_of_sight.nil?
-    @line_of_sight.map do |tile|
-      @king_in_danger = tile if tile.check?
-      break if tile.check?
+  def check_for_surrounding_pawns(piece, king)
+    (piece.longitude == king.longitude - 1 ||
+      piece.longitude == king.longitude + 1) &&
+      piece.latitude == king.latitude + 1 &&
+      piece.side != king.side
+  end
+
+  def check_for_surrounding_king(king)
+    @pieces.map do |piece|
+      next unless piece.instance_of?(King) && piece.side != king.side
+
+      off_limits = []
+      other_king_moves = piece.possible_moves.flatten(1)
+      other_king_moves.map do |move|
+        tile = find_tile(piece.longitude + move[0], piece.latitude + move[1])
+        off_limits << tile
+      end
+      clear_highlighted_tiles(off_limits)
     end
-    if @check == true && @line_of_sight.include?(tile_to_move) && tile_to_move.latitude == @king_in_danger.latitude
-      puts "\nCheck false!"
-      @check = false
-      @line_of_sight = []
-    elsif @check == true && !@line_of_sight.include?(tile_to_move) && @turn == @king_in_danger.side
-      @moving = false
-      clear_board
-      try_again('king_still_in_check')
+  end
+
+  def check_kings_line_of_sight(king)
+    check_cardinal_directions(king)
+    check_intercardinal_directions(king)
+  end
+
+  def check_cardinal_directions(king)
+    king.cardinal_directions.map do |direction|
+      direction.map do |tile|
+        piece = find_piece(king.longitude + tile[0], king.latitude + tile[1])
+        next if piece.nil?
+        break if piece.side == king.side || (piece.side != king.side && piece.instance_of?(Pawn) ||
+                 piece.instance_of?(Knight) || piece.instance_of?(Bishop) || piece.instance_of?(King))
+
+        @check = check_for_cardinal_danger(piece, king)
+        display_check_message if @check == false
+      end
     end
+  end
+
+  def check_intercardinal_directions(king)
+    king.intercardinal_directions.map do |direction|
+      direction.map do |tile|
+        piece = find_piece(king.longitude + tile[0], king.latitude + tile[1])
+        next if piece.nil?
+        break if piece.side == king.side || (piece.side != king.side && piece.instance_of?(Pawn) ||
+                 piece.instance_of?(Knight) || piece.instance_of?(Rook) || piece.instance_of?(King))
+
+        @check = check_for_intercardinal_danger(piece, king)
+        display_check_message if @check == false
+      end
+    end
+  end
+
+  def check_for_cardinal_danger(piece, king)
+    piece.side != king.side && piece.instance_of?(Rook) || piece.instance_of?(Queen)
+  end
+
+  def check_for_intercardinal_danger(piece, king)
+    piece.side != king.side && piece.instance_of?(Queen) || piece.instance_of?(Bishop)
+  end
+
+  def display_check_message
+    puts "\nCHECK!".colorize(color: :yellow) if @check == true
   end
 
   def clear_highlighted_tiles(array)
@@ -285,7 +330,7 @@ class Chess
   end
 
   def check_move(input)
-    check_for_check if @check == true
+    # check_for_check if @check == true
     try_again('cant_move_to_same_place') if same_place?(input)
     check_tile_and_piece
     kill_piece
