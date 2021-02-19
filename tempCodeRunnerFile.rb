@@ -1,1 +1,1 @@
-next if target_piece.instance_of?(King) && target_piece.side != piece.side
+remove_king_bottom_left_and_right_tiles

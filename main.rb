@@ -9,7 +9,7 @@ class Chess
 
   def initialize
     @check = false
-    @turn = 'white'
+    @turn = 'black'
     @moving = false
     welcome
     @board = Board.new
@@ -211,6 +211,7 @@ class Chess
 
         @line_of_sight << tile unless @line_of_sight.include?(tile)
       end
+      check_for_near_queen(piece, @selected_piece) if piece.instance_of?(Queen)
     end
   end
 
@@ -242,6 +243,53 @@ class Chess
       piece.longitude == king.longitude + 1) &&
       piece.latitude == king.latitude + 1 &&
       piece.side != king.side
+  end
+
+  def check_for_near_queen(queen, king)
+    remove_king_left_upper_and_bottom_tiles(king) if queen.longitude == king.longitude - 1 &&
+                                                     queen.latitude == king.latitude
+    remove_king_right_upper_and_bottom_tiles(king) if queen.longitude == king.longitude + 1 &&
+                                                      queen.latitude == king.latitude
+    remove_king_upper_left_and_right_tiles(king) if queen.latitude == king.latitude + 1 &&
+                                                    queen.longitude == king.longitude
+    remove_king_bottom_left_and_right_tiles(king) if queen.latitude == king.latitude - 1 &&
+                                                     queen.longitude == king.longitude
+  end
+
+  def remove_king_left_upper_and_bottom_tiles(king)
+    tiles_to_remove = []
+    tiles_to_remove << find_tile(king.longitude, king.latitude + 1)
+    tiles_to_remove << find_tile(king.longitude - 1, king.latitude + 1)
+    tiles_to_remove << find_tile(king.longitude, king.latitude - 1)
+    tiles_to_remove << find_tile(king.longitude - 1, king.latitude - 1)
+    clear_highlighted_tiles(tiles_to_remove)
+  end
+
+  def remove_king_right_upper_and_bottom_tiles(king)
+    tiles_to_remove = []
+    tiles_to_remove << find_tile(king.longitude, king.latitude + 1)
+    tiles_to_remove << find_tile(king.longitude + 1, king.latitude + 1)
+    tiles_to_remove << find_tile(king.longitude, king.latitude - 1)
+    tiles_to_remove << find_tile(king.longitude + 1, king.latitude - 1)
+    clear_highlighted_tiles(tiles_to_remove)
+  end
+
+  def remove_king_upper_left_and_right_tiles(king)
+    tiles_to_remove = []
+    tiles_to_remove << find_tile(king.longitude - 1, king.latitude)
+    tiles_to_remove << find_tile(king.longitude - 1, king.latitude + 1)
+    tiles_to_remove << find_tile(king.longitude + 1, king.latitude)
+    tiles_to_remove << find_tile(king.longitude + 1, king.latitude + 1)
+    clear_highlighted_tiles(tiles_to_remove)
+  end
+
+  def remove_king_bottom_left_and_right_tiles(king)
+    tiles_to_remove = []
+    tiles_to_remove << find_tile(king.longitude - 1, king.latitude)
+    tiles_to_remove << find_tile(king.longitude - 1, king.latitude - 1)
+    tiles_to_remove << find_tile(king.longitude + 1, king.latitude)
+    tiles_to_remove << find_tile(king.longitude + 1, king.latitude - 1)
+    clear_highlighted_tiles(tiles_to_remove)
   end
 
   def check_kings_line_of_sight(king)
