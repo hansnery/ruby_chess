@@ -66,8 +66,6 @@ class Chess
     check_kings_safety
     change_player
     @moving = false
-    # @moving = false if @check == false
-    # select_king if @check == true
     ask_input
   end
 
@@ -184,7 +182,6 @@ class Chess
     @pieces.map do |piece|
       next if piece.side == @selected_piece.side || piece.longitude.nil? || piece.instance_of?(Pawn)
 
-      # p piece
       king_check_for_others(piece)
       clear_highlighted_tiles(@line_of_sight)
     end
@@ -205,7 +202,9 @@ class Chess
     piece.possible_moves.map do |direction|
       direction.map do |move|
         tile = find_tile(piece.longitude + move[0], piece.latitude + move[1])
-        target_piece = find_piece(letter_to_number(tile.longitude), tile.latitude) if tile.instance_of?(Tile)
+        next unless tile.instance_of?(Tile)
+
+        target_piece = find_piece(letter_to_number(tile.longitude), tile.latitude)
         @line_of_sight << tile if @highlighted_tiles.include?(tile)
         next if target_piece.instance_of?(King) && target_piece.side != piece.side
         break unless inside_the_board?(tile) && tile.empty?
@@ -219,6 +218,7 @@ class Chess
     @check = false
     check_for_check(@white_king)
     check_for_check(@black_king)
+    display_check_message if @check == true
   end
 
   def check_for_check(king)
@@ -233,7 +233,7 @@ class Chess
       next if piece.nil? || piece.side == king.side
 
       @check = check_for_surrounding_pawns(piece, king)
-      display_check_message if @check == false
+      # display_check_message
       break if @check == true
     end
   end
@@ -243,20 +243,6 @@ class Chess
       piece.longitude == king.longitude + 1) &&
       piece.latitude == king.latitude + 1 &&
       piece.side != king.side
-  end
-
-  def check_for_surrounding_king(king)
-    @pieces.map do |piece|
-      next unless piece.instance_of?(King) && piece.side != king.side
-
-      off_limits = []
-      other_king_moves = piece.possible_moves.flatten(1)
-      other_king_moves.map do |move|
-        tile = find_tile(piece.longitude + move[0], piece.latitude + move[1])
-        off_limits << tile
-      end
-      clear_highlighted_tiles(off_limits)
-    end
   end
 
   def check_kings_line_of_sight(king)
@@ -273,7 +259,7 @@ class Chess
                  piece.instance_of?(Knight) || piece.instance_of?(Bishop) || piece.instance_of?(King))
 
         @check = check_for_cardinal_danger(piece, king)
-        display_check_message if @check == false
+        # display_check_message
       end
     end
   end
@@ -287,7 +273,7 @@ class Chess
                  piece.instance_of?(Knight) || piece.instance_of?(Rook) || piece.instance_of?(King))
 
         @check = check_for_intercardinal_danger(piece, king)
-        display_check_message if @check == false
+        # display_check_message
       end
     end
   end
@@ -298,6 +284,20 @@ class Chess
 
   def check_for_intercardinal_danger(piece, king)
     piece.side != king.side && piece.instance_of?(Queen) || piece.instance_of?(Bishop)
+  end
+
+  def check_for_surrounding_king(king)
+    @pieces.map do |piece|
+      next unless piece.instance_of?(King) && piece.side != king.side
+
+      off_limits = []
+      other_king_moves = piece.possible_moves.flatten(1)
+      other_king_moves.map do |move|
+        tile = find_tile(piece.longitude + move[0], piece.latitude + move[1])
+        off_limits << tile
+      end
+      clear_highlighted_tiles(off_limits)
+    end
   end
 
   def display_check_message
@@ -330,7 +330,6 @@ class Chess
   end
 
   def check_move(input)
-    # check_for_check if @check == true
     try_again('cant_move_to_same_place') if same_place?(input)
     check_tile_and_piece
     kill_piece
@@ -352,19 +351,6 @@ class Chess
       @selected_piece.moved_once = true if @selected_piece.instance_of?(Pawn) && @selected_piece.moved_once == false
     end
   end
-
-  # def select_king
-  #   side = 'black' if @turn == 'black'
-  #   side = 'white' if @turn == 'white'
-  #   @pieces.map do |piece|
-  #     select_piece(piece.longitude, piece.latitude) if piece.instance_of?(King) && piece.side == side
-  #   end
-  #   @check = false
-  #   @target_longitude = @selected_piece.longitude
-  #   @target_latitude = @selected_piece.latitude
-  #   show_possible_moves
-  #   select_destination
-  # end
 
   def print_select_piece
     puts "\nCheck: #{@check}\nTurn: #{@turn}"
