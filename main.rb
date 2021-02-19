@@ -202,14 +202,14 @@ class Chess
     piece.possible_moves.map do |direction|
       direction.map do |move|
         tile = find_tile(piece.longitude + move[0], piece.latitude + move[1])
-        next unless tile.instance_of?(Tile)
+        next unless inside_the_board?(tile)
 
-        target_piece = find_piece(letter_to_number(tile.longitude), tile.latitude)
+        target_king = find_piece(letter_to_number(tile.longitude), tile.latitude)
         @line_of_sight << tile if @highlighted_tiles.include?(tile)
-        next if target_piece.instance_of?(King) && target_piece.side != piece.side
-        break unless inside_the_board?(tile) && tile.empty?
+        next if target_king.instance_of?(King) && target_king.side != piece.side
+        break unless tile.empty?
 
-        @line_of_sight << tile
+        @line_of_sight << tile unless @line_of_sight.include?(tile)
       end
     end
   end
@@ -233,7 +233,6 @@ class Chess
       next if piece.nil? || piece.side == king.side
 
       @check = check_for_surrounding_pawns(piece, king)
-      # display_check_message
       break if @check == true
     end
   end
@@ -259,7 +258,6 @@ class Chess
                  piece.instance_of?(Knight) || piece.instance_of?(Bishop) || piece.instance_of?(King))
 
         @check = check_for_cardinal_danger(piece, king)
-        # display_check_message
       end
     end
   end
@@ -273,7 +271,6 @@ class Chess
                  piece.instance_of?(Knight) || piece.instance_of?(Rook) || piece.instance_of?(King))
 
         @check = check_for_intercardinal_danger(piece, king)
-        # display_check_message
       end
     end
   end
@@ -290,13 +287,13 @@ class Chess
     @pieces.map do |piece|
       next unless piece.instance_of?(King) && piece.side != king.side
 
-      off_limits = []
+      @line_of_sight = []
       other_king_moves = piece.possible_moves.flatten(1)
       other_king_moves.map do |move|
         tile = find_tile(piece.longitude + move[0], piece.latitude + move[1])
-        off_limits << tile
+        @line_of_sight << tile
       end
-      clear_highlighted_tiles(off_limits)
+      clear_highlighted_tiles(@line_of_sight)
     end
   end
 

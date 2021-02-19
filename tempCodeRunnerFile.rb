@@ -1,1 +1,1 @@
-        p target_piece
+next if target_piece.instance_of?(King) && target_piece.side != piece.side
