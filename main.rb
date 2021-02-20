@@ -110,6 +110,7 @@ class Chess
     piece_cant_move if @highlighted_tiles.empty? && piece_moves_longitudinally_or_transversally?(@selected_piece)
     knight_moves if @selected_piece.instance_of?(Knight)
     @line_of_sight = [] if @selected_piece.instance_of?(King)
+    @tiles_in_check = [] if @selected_piece.instance_of?(King)
     king_check if @selected_piece.instance_of?(King)
     check_for_surrounding_king(@selected_piece) if @selected_piece.instance_of?(King)
   end
@@ -184,7 +185,7 @@ class Chess
       next if piece.side == @selected_piece.side || piece.longitude.nil? || piece.instance_of?(Pawn)
 
       king_check_for_others(piece)
-      clear_highlighted_tiles(@line_of_sight)
+      # clear_highlighted_tiles(@line_of_sight)
     end
   end
 
@@ -203,6 +204,7 @@ class Chess
     piece.possible_moves.map do |direction|
       king_check_direction(piece, direction)
       check_for_near_queen(piece, @selected_piece) if piece.instance_of?(Queen)
+      clear_highlighted_tiles(@line_of_sight)
     end
   end
 
@@ -218,6 +220,7 @@ class Chess
 
       @line_of_sight << tile unless @line_of_sight.include?(tile)
     end
+    # @line_of_sight.map { |n| puts "#{n.longitude}, #{n.latitude}"}
   end
 
   def check_kings_safety
