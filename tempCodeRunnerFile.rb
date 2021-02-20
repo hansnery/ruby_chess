@@ -1,1 +1,1 @@
-remove_king_bottom_left_and_right_tiles
+def king_check_for_others(piece)

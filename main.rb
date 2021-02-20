@@ -57,6 +57,7 @@ class Chess
     check_tile_and_piece
     select_piece(@target_longitude, @target_latitude)
     show_possible_moves
+    clear_highlighted_tiles(@tiles_in_check) unless @tiles_in_check.nil?
     select_destination
   end
 
@@ -306,6 +307,7 @@ class Chess
                  piece.instance_of?(Knight) || piece.instance_of?(Bishop) || piece.instance_of?(King))
 
         @check = check_for_cardinal_danger(piece, king)
+        clear_tiles_in_check(piece, king, direction) if check_for_cardinal_danger(piece, king)
       end
     end
   end
@@ -319,6 +321,7 @@ class Chess
                  piece.instance_of?(Knight) || piece.instance_of?(Rook) || piece.instance_of?(King))
 
         @check = check_for_intercardinal_danger(piece, king)
+        clear_tiles_in_check(king, direction) if check_for_intercardinal_danger(piece, king)
       end
     end
   end
@@ -345,15 +348,32 @@ class Chess
     end
   end
 
-  def display_check_message
-    puts "\nCHECK!".colorize(color: :yellow) if @check == true
-  end
-
   def clear_highlighted_tiles(array)
     @highlighted_tiles.each_with_index do |tile, idx|
       @highlighted_tiles.delete_at(idx) if array.include?(tile)
       tile.highlighted = false if array.include?(tile)
     end
+  end
+
+  def collect_tiles_for_clearing(piece, king, array)
+    tiles_to_clear = []
+    array.map do |tile|
+      tile = find_tile(king.longitude + tile[0], king.latitude + tile[1])
+      break if tile.data == piece.data && tile.instance_of?(Tile)
+
+      tiles_to_clear << tile unless tile.nil?
+    end
+    tiles_to_clear
+  end
+
+  def clear_tiles_in_check(piece, king, array)
+    tiles_to_clear = collect_tiles_for_clearing(piece, king, array)
+    @tiles_in_check = tiles_to_clear
+    # clear_highlighted_tiles(tiles_to_clear)
+  end
+
+  def display_check_message
+    puts "\nCHECK!".colorize(color: :yellow) if @check == true
   end
 
   def inside_the_board?(tile)
@@ -364,7 +384,7 @@ class Chess
     input == number_to_letter(@selected_piece.longitude) + @selected_piece.latitude.to_s
   end
 
-  def kill_piece
+  def capture_piece
     piece = find_piece(@target_longitude, @target_latitude)
     # p piece
     return if piece.nil?
@@ -377,7 +397,7 @@ class Chess
   def check_move(input)
     try_again('cant_move_to_same_place') if same_place?(input)
     check_tile_and_piece
-    kill_piece
+    capture_piece
   end
 
   def select_destination
