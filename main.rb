@@ -201,18 +201,22 @@ class Chess
 
   def king_check_for_others(piece)
     piece.possible_moves.map do |direction|
-      direction.map do |move|
-        tile = find_tile(piece.longitude + move[0], piece.latitude + move[1])
-        next unless inside_the_board?(tile)
-
-        target_king = find_piece(letter_to_number(tile.longitude), tile.latitude)
-        @line_of_sight << tile if @highlighted_tiles.include?(tile)
-        next if target_king.instance_of?(King) && target_king.side != piece.side
-        break unless tile.empty?
-
-        @line_of_sight << tile unless @line_of_sight.include?(tile)
-      end
+      king_check_direction(piece, direction)
       check_for_near_queen(piece, @selected_piece) if piece.instance_of?(Queen)
+    end
+  end
+
+  def king_check_direction(piece, direction)
+    direction.map do |move|
+      tile = find_tile(piece.longitude + move[0], piece.latitude + move[1])
+      next unless inside_the_board?(tile)
+
+      target_king = find_piece(letter_to_number(tile.longitude), tile.latitude)
+      @line_of_sight << tile if @highlighted_tiles.include?(tile)
+      next if target_king.instance_of?(King) && target_king.side != piece.side
+      break unless tile.empty?
+
+      @line_of_sight << tile unless @line_of_sight.include?(tile)
     end
   end
 
@@ -369,7 +373,6 @@ class Chess
   def clear_tiles_in_check(piece, king, array)
     tiles_to_clear = collect_tiles_for_clearing(piece, king, array)
     @tiles_in_check = tiles_to_clear
-    # clear_highlighted_tiles(tiles_to_clear)
   end
 
   def display_check_message
