@@ -232,6 +232,11 @@ class Chess
     king.check = method
   end
 
+  def uncheck_king
+    @king_in_check.check = false
+    @king_in_check = nil
+  end
+
   def check_kings_safety
     @check = false
     check_for_check(@white_king)
@@ -373,7 +378,7 @@ class Chess
   def check_if_still_in_check
     check_kings_safety
     find_king_in_check
-    @king_in_check.check = false if @check == false
+    uncheck_king if @check == false
     return if @check == false || @turn != @king_in_check.side
 
     select_piece(@target_longitude, @target_latitude)
