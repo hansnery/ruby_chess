@@ -271,8 +271,8 @@ class Chess
   def check_for_surrounding_pawns(piece, king)
     (piece.longitude == king.longitude - 1 ||
       piece.longitude == king.longitude + 1) &&
-      piece.latitude == king.latitude + 1 ||
-      piece.latitude == king.latitude - 1 &&
+      ((piece.latitude == king.latitude + 1 && piece.side == 'black') ||
+      (piece.latitude == king.latitude - 1 && piece.side == 'white')) &&
       piece.side != king.side && piece.instance_of?(Pawn)
   end
 
