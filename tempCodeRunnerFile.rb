@@ -1,1 +1,3 @@
-def king_check_for_others(piece)
+    # p @selected_piece
+    # p @target_longitude
+    # p @target_latitude

@@ -47,23 +47,26 @@ class Chess
 
   def play_round(input)
     if @moving == false
-      playing
+      playing(input)
     else
       moving(input)
     end
   end
 
-  def playing
+  def playing(input)
+    @last_input = input
     check_tile_and_piece
     select_piece(@target_longitude, @target_latitude)
     show_possible_moves
-    clear_highlighted_tiles(@tiles_in_check) unless @tiles_in_check.nil?
-    select_destination
+    # clear_highlighted_tiles(@tiles_in_check) unless @tiles_in_check.nil?
+    @moving = true
+    ask_input
   end
 
   def moving(input)
     check_move(input)
     move(input)
+    check_if_still_in_check if @check == true
     check_kings_safety
     change_player
     @moving = false
@@ -179,7 +182,7 @@ class Chess
       next if piece.side == @selected_piece.side || piece.longitude.nil? || !piece.instance_of?(Pawn)
 
       king_check_for_pawns(piece)
-      clear_highlighted_tiles(@line_of_sight)
+      # clear_highlighted_tiles(@line_of_sight)
     end
     @pieces.map do |piece|
       next if piece.side == @selected_piece.side || piece.longitude.nil? || piece.instance_of?(Pawn)
@@ -198,6 +201,7 @@ class Chess
 
       @line_of_sight << tile
     end
+    clear_highlighted_tiles(@line_of_sight)
   end
 
   def king_check_for_others(piece)
@@ -223,6 +227,11 @@ class Chess
     # @line_of_sight.map { |n| puts "#{n.longitude}, #{n.latitude}"}
   end
 
+  def check_king(king, method)
+    @check = method
+    king.check = method
+  end
+
   def check_kings_safety
     @check = false
     check_for_check(@white_king)
@@ -241,7 +250,7 @@ class Chess
       piece = find_piece(king.longitude + move[0], king.latitude + move[1])
       next if piece.nil? || piece.side == king.side
 
-      @check = check_for_surrounding_pawns(piece, king)
+      check_king(king, check_for_surrounding_pawns(piece, king))
       break if @check == true
     end
   end
@@ -313,7 +322,7 @@ class Chess
         break if piece.side == king.side || (piece.side != king.side && piece.instance_of?(Pawn) ||
                  piece.instance_of?(Knight) || piece.instance_of?(Bishop) || piece.instance_of?(King))
 
-        @check = check_for_cardinal_danger(piece, king)
+        check_king(king, check_for_cardinal_danger(piece, king))
         clear_tiles_in_check(piece, king, direction) if check_for_cardinal_danger(piece, king)
       end
     end
@@ -327,8 +336,8 @@ class Chess
         break if piece.side == king.side || (piece.side != king.side && piece.instance_of?(Pawn) ||
                  piece.instance_of?(Knight) || piece.instance_of?(Rook) || piece.instance_of?(King))
 
-        @check = check_for_intercardinal_danger(piece, king)
-        clear_tiles_in_check(king, direction) if check_for_intercardinal_danger(piece, king)
+        check_king(king, check_for_intercardinal_danger(piece, king))
+        clear_tiles_in_check(piece, king, direction) if check_for_intercardinal_danger(piece, king)
       end
     end
   end
@@ -353,6 +362,27 @@ class Chess
       end
       clear_highlighted_tiles(@line_of_sight)
     end
+  end
+
+  def find_king_in_check
+    @pieces.map do |piece|
+      @king_in_check = piece if piece.instance_of?(King) && piece.check?
+    end
+  end
+
+  def check_if_still_in_check
+    check_kings_safety
+    return if @check == false
+
+    find_king_in_check
+    return unless @turn == @king_in_check.side
+
+    select_piece(@target_longitude, @target_latitude)
+    move_piece(letter_to_longitude(@last_input[0]), @last_input[1].to_i)
+    clear_board
+    @moving = false
+    @selected_piece.moved_once = false if @selected_piece.instance_of?(Pawn)
+    try_again('king_still_in_check') if @check == true
   end
 
   def clear_highlighted_tiles(array)
@@ -406,11 +436,6 @@ class Chess
     capture_piece
   end
 
-  def select_destination
-    @moving = true
-    ask_input
-  end
-
   def move(input)
     @highlighted_tiles.map do |tile|
       longitude = tile.longitude.to_s
@@ -424,6 +449,7 @@ class Chess
   end
 
   def print_select_piece
+    # @highlighted_tiles.map { |n| puts "#{n.data} #{n.longitude}, #{n.latitude}" } unless @highlighted_tiles.nil?
     puts "\nCheck: #{@check}\nTurn: #{@turn}"
     if @turn == 'white'
       puts 'SELECT PIECE(WHITE): '.colorize(color: :yellow)
@@ -433,6 +459,7 @@ class Chess
   end
 
   def print_move_to
+    # @highlighted_tiles.map { |n| puts "#{n.data} #{n.longitude}, #{n.latitude}" } unless @highlighted_tiles.nil?
     puts "\nCheck: #{@check}\nTurn: #{@turn}"
     if @turn == 'white'
       puts 'MOVE TO(WHITE): '.colorize(color: :yellow)

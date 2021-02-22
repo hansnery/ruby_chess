@@ -135,7 +135,7 @@ module BoardMethods
 
   def black_second_row
     [
-      @black_rook1 = Rook.new('a', 1, 'black'), @black_rook2 = Rook.new('h', 8, 'black'),
+      @black_rook1 = Rook.new('a', 8, 'black'), @black_rook2 = Rook.new('h', 8, 'black'),
       @black_knight1 = Knight.new('b', 8, 'black'), @black_knight2 = Knight.new('g', 8, 'black'),
       @black_bishop1 = Bishop.new('c', 8, 'black'), @black_bishop2 = Bishop.new('f', 8, 'black'),
       @black_king = King.new('e', 8, 'black'), @black_queen = Queen.new('e', 4, 'black')
