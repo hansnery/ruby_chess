@@ -237,6 +237,12 @@ class Chess
     @king_in_check = nil
   end
 
+  def find_king_in_check
+    @pieces.map do |piece|
+      @king_in_check = piece if piece.instance_of?(King) && piece.check?
+    end
+  end
+
   def check_kings_safety
     @check = false
     check_for_check(@white_king)
@@ -264,7 +270,7 @@ class Chess
     (piece.longitude == king.longitude - 1 ||
       piece.longitude == king.longitude + 1) &&
       piece.latitude == king.latitude + 1 &&
-      piece.side != king.side
+      piece.side != king.side && piece.instance_of?(Pawn)
   end
 
   def check_for_near_queen(queen, king)
@@ -366,12 +372,6 @@ class Chess
         @line_of_sight << tile
       end
       clear_highlighted_tiles(@line_of_sight)
-    end
-  end
-
-  def find_king_in_check
-    @pieces.map do |piece|
-      @king_in_check = piece if piece.instance_of?(King) && piece.check?
     end
   end
 

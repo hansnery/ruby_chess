@@ -1,3 +1,1 @@
-    # p @selected_piece
-    # p @target_longitude
-    # p @target_latitude
+check_kings_line_of_sight
