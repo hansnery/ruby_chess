@@ -233,6 +233,8 @@ class Chess
   end
 
   def uncheck_king
+    return if @king_in_check.nil?
+
     @king_in_check.check = false
     @king_in_check = nil
   end
@@ -269,7 +271,8 @@ class Chess
   def check_for_surrounding_pawns(piece, king)
     (piece.longitude == king.longitude - 1 ||
       piece.longitude == king.longitude + 1) &&
-      piece.latitude == king.latitude + 1 &&
+      piece.latitude == king.latitude + 1 ||
+      piece.latitude == king.latitude - 1 &&
       piece.side != king.side && piece.instance_of?(Pawn)
   end
 
