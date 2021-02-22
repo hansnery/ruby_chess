@@ -372,10 +372,9 @@ class Chess
 
   def check_if_still_in_check
     check_kings_safety
-    return if @check == false
-
     find_king_in_check
-    return unless @turn == @king_in_check.side
+    @king_in_check.check = false if @check == false
+    return if @check == false || @turn != @king_in_check.side
 
     select_piece(@target_longitude, @target_latitude)
     move_piece(letter_to_longitude(@last_input[0]), @last_input[1].to_i)
