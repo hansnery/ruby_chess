@@ -39,7 +39,7 @@ class Chess
 
   def check_input(input)
     case input
-    when /^[a-hA-H]{1}[1-8]/
+    when /^[a-hA-H]{1}[1-8]$/
       play_round(input)
     else
       try_again('wrong_input')
