@@ -10,7 +10,7 @@ class Chess
   def initialize
     @check = false
     @checkmate = false
-    @turn = 'black'
+    @turn = 'white'
     @moving = false
     welcome
     @board = Board.new
@@ -59,7 +59,6 @@ class Chess
     check_tile_and_piece
     select_piece(@target_longitude, @target_latitude)
     show_possible_moves
-    # clear_highlighted_tiles(@tiles_in_check) unless @tiles_in_check.nil?
     @moving = true
     ask_input
   end
@@ -81,6 +80,7 @@ class Chess
     puts "\nThis piece can\'t move! Choose another one.".colorize(color: :yellow) if because == 'cant_move'
     puts "\nCan\'t move to the same place!".colorize(color: :yellow) if because == 'cant_move_to_same_place'
     puts "\nKing is still in check! Try another move.".colorize(color: :yellow) if because == 'king_still_in_check'
+    new_game? if @checkmate == true
     ask_input
   end
 
@@ -185,7 +185,8 @@ class Chess
       king_check_for_pawns(piece)
     end
     @pieces.map do |piece|
-      next if piece.side == @selected_piece.side || piece.longitude.nil? || piece.instance_of?(Pawn)
+      next if piece.side == @selected_piece.side || piece.longitude.nil? || piece.instance_of?(Pawn) ||
+              piece.instance_of?(Knight)
 
       king_check_for_others(piece)
     end
@@ -223,7 +224,6 @@ class Chess
 
       @line_of_sight << tile unless @line_of_sight.include?(tile)
     end
-    # @line_of_sight.map { |n| puts "#{n.longitude}, #{n.latitude}"}
   end
 
   def check_king(king, piece, method)
@@ -250,12 +250,14 @@ class Chess
     @check = false
     check_for_check(@white_king)
     check_for_check(@black_king)
+    display_check_message if @check == true
     check_for_checkmate if @check == true
-    display_check_message if @check == true && @checkmate == false
+    # display_check_message if @check == true # && @checkmate == false
   end
 
   def check_for_check(king)
     check_kings_surroundings(king)
+    check_kings_far_surroundings(king)
     check_kings_line_of_sight(king)
   end
 
@@ -276,6 +278,29 @@ class Chess
       ((piece.latitude == king.latitude + 1 && piece.side == 'black') ||
       (piece.latitude == king.latitude - 1 && piece.side == 'white')) &&
       piece.side != king.side && piece.instance_of?(Pawn)
+  end
+
+  def check_kings_far_surroundings(king)
+    @pieces.map do |piece|
+      break if @check == true
+
+      next unless piece.instance_of?(Knight) && piece.side != king.side
+
+      check_king(king, piece, check_for_surrounding_knights(piece, king))
+      break if @check == true
+    end
+  end
+
+  def check_for_surrounding_knights(piece, king)
+    (piece.longitude == king.longitude + 1 && piece.latitude == king.latitude + 2) ||
+      (piece.longitude == king.longitude + 2 && piece.latitude == king.latitude + 1) ||
+      (piece.longitude == king.longitude + 2 && piece.latitude == king.latitude - 1) ||
+      (piece.longitude == king.longitude + 1 && piece.latitude == king.latitude - 2) ||
+      (piece.longitude == king.longitude - 1 && piece.latitude == king.latitude - 2) ||
+      (piece.longitude == king.longitude - 2 && piece.latitude == king.latitude - 1) ||
+      (piece.longitude == king.longitude - 2 && piece.latitude == king.latitude + 1) ||
+      (piece.longitude == king.longitude - 1 && piece.latitude == king.latitude + 2) &&
+        piece.side != king.side && piece.instance_of?(Knight)
   end
 
   def check_for_near_queen(queen, king)
@@ -398,6 +423,7 @@ class Chess
     @checkmate = true
     puts "\nCHECKMATE!".colorize(color: :yellow)
     puts "\n#{@piece_checking_king.side.capitalize} wins!".colorize(color: :yellow)
+    new_game?
   end
 
   def check_for_checkmate
@@ -476,7 +502,7 @@ class Chess
   end
 
   def display_check_message
-    puts "\nCHECK!".colorize(color: :yellow) if @check == true && @checkmate == false
+    puts "\nCHECK!".colorize(color: :yellow) if @check == true # && @checkmate == false
   end
 
   def inside_the_board?(tile)
@@ -516,8 +542,9 @@ class Chess
   end
 
   def print_select_piece
-    # p @piece_checking_king
-    # @highlighted_tiles.map { |n| puts "#{n.data} #{n.longitude}, #{n.latitude}" } unless @highlighted_tiles.nil?
+    p @moving
+    p @turn
+    p @selected_piece
     puts "\nCheck: #{@check}\nTurn: #{@turn}"
     if @turn == 'white'
       puts 'SELECT PIECE(WHITE): '.colorize(color: :yellow)
@@ -527,8 +554,9 @@ class Chess
   end
 
   def print_move_to
-    # p @piece_checking_king
-    # @highlighted_tiles.map { |n| puts "#{n.data} #{n.longitude}, #{n.latitude}" } unless @highlighted_tiles.nil?
+    p @moving
+    p @turn
+    p @selected_piece
     puts "\nCheck: #{@check}\nTurn: #{@turn}"
     if @turn == 'white'
       puts 'MOVE TO(WHITE): '.colorize(color: :yellow)
@@ -540,6 +568,25 @@ class Chess
   def change_player
     @turn = 'black' if @selected_piece.side == 'white'
     @turn = 'white' if @selected_piece.side == 'black'
+  end
+
+  def check_input_for_new_game(input)
+    case input
+    when /^(y|n)/
+      exit(true) if input == 'n'
+      if input == 'y'
+        initialize
+        clear_board
+      end
+    else
+      try_again('wrong_input')
+    end
+  end
+
+  def new_game?
+    puts "\nWould you like to start a new game? [Y/N]"
+    input = gets.chomp.downcase
+    check_input_for_new_game(input)
   end
 end
 
