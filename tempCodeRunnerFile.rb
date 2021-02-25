@@ -1,1 +1,1 @@
-check_kings_line_of_sight
+play_round(input)

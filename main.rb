@@ -9,6 +9,7 @@ class Chess
 
   def initialize
     @check = false
+    @checkmate = false
     @turn = 'black'
     @moving = false
     welcome
@@ -182,13 +183,11 @@ class Chess
       next if piece.side == @selected_piece.side || piece.longitude.nil? || !piece.instance_of?(Pawn)
 
       king_check_for_pawns(piece)
-      # clear_highlighted_tiles(@line_of_sight)
     end
     @pieces.map do |piece|
       next if piece.side == @selected_piece.side || piece.longitude.nil? || piece.instance_of?(Pawn)
 
       king_check_for_others(piece)
-      # clear_highlighted_tiles(@line_of_sight)
     end
   end
 
@@ -227,8 +226,9 @@ class Chess
     # @line_of_sight.map { |n| puts "#{n.longitude}, #{n.latitude}"}
   end
 
-  def check_king(king, method)
+  def check_king(king, piece, method)
     @check = method
+    @piece_checking_king = piece
     king.check = method
   end
 
@@ -237,6 +237,7 @@ class Chess
 
     @king_in_check.check = false
     @king_in_check = nil
+    @piece_checking_king = nil
   end
 
   def find_king_in_check
@@ -249,7 +250,8 @@ class Chess
     @check = false
     check_for_check(@white_king)
     check_for_check(@black_king)
-    display_check_message if @check == true
+    check_for_checkmate if @check == true
+    display_check_message if @check == true && @checkmate == false
   end
 
   def check_for_check(king)
@@ -263,7 +265,7 @@ class Chess
       piece = find_piece(king.longitude + move[0], king.latitude + move[1])
       next if piece.nil? || piece.side == king.side
 
-      check_king(king, check_for_surrounding_pawns(piece, king))
+      check_king(king, piece, check_for_surrounding_pawns(piece, king))
       break if @check == true
     end
   end
@@ -336,7 +338,7 @@ class Chess
         break if piece.side == king.side || (piece.side != king.side && piece.instance_of?(Pawn) ||
                  piece.instance_of?(Knight) || piece.instance_of?(Bishop) || piece.instance_of?(King))
 
-        check_king(king, check_for_cardinal_danger(piece, king))
+        check_king(king, piece, check_for_cardinal_danger(piece, king))
         clear_tiles_in_check(piece, king, direction) if check_for_cardinal_danger(piece, king)
       end
     end
@@ -350,7 +352,7 @@ class Chess
         break if piece.side == king.side || (piece.side != king.side && piece.instance_of?(Pawn) ||
                  piece.instance_of?(Knight) || piece.instance_of?(Rook) || piece.instance_of?(King))
 
-        check_king(king, check_for_intercardinal_danger(piece, king))
+        check_king(king, piece, check_for_intercardinal_danger(piece, king))
         clear_tiles_in_check(piece, king, direction) if check_for_intercardinal_danger(piece, king)
       end
     end
@@ -380,7 +382,7 @@ class Chess
 
   def check_if_still_in_check
     check_kings_safety
-    find_king_in_check
+    find_king_in_check if @check == true
     uncheck_king if @check == false
     return if @check == false || @turn != @king_in_check.side
 
@@ -390,6 +392,64 @@ class Chess
     @moving = false
     @selected_piece.moved_once = false if @selected_piece.instance_of?(Pawn)
     try_again('king_still_in_check') if @check == true
+  end
+
+  def checkmate
+    @checkmate = true
+    puts "\nCHECKMATE!".colorize(color: :yellow)
+    puts "\n#{@piece_checking_king.side.capitalize} wins!".colorize(color: :yellow)
+  end
+
+  def check_for_checkmate
+    find_king_in_check
+    tile_with_piece_checking_king = find_tile(@piece_checking_king.longitude, @piece_checking_king.latitude)
+    king_cant_move?(@king_in_check) if no_pawn_can_save_the_king?(tile_with_piece_checking_king) &&
+                                       no_other_piece_can_save_the_king?(tile_with_piece_checking_king)
+  end
+
+  def no_pawn_can_save_the_king?(tile_with_piece_checking_king)
+    @pieces.map do |piece|
+      next unless piece.side == @king_in_check.side && piece.instance_of?(Pawn)
+
+      piece.diagonal_attack.map do |move|
+        tile = find_tile(piece.longitude + move[0], piece.latitude + move[1])
+        return false if tile == tile_with_piece_checking_king
+      end
+    end
+    true
+  end
+
+  def no_other_piece_can_save_the_king?(tile_with_piece_checking_king)
+    @pieces.map do |piece|
+      next if piece.instance_of?(Pawn) || piece.instance_of?(King) || piece.side != @king_in_check.side
+
+      check_if_piece_can_save_the_king(piece, tile_with_piece_checking_king)
+    end
+    true
+  end
+
+  def check_if_piece_can_save_the_king(piece, tile_with_piece_checking_king)
+    piece.possible_moves.map do |direction|
+      direction.map do |move|
+        tile = find_tile(piece.longitude + move[0], piece.latitude + move[1])
+        next if tile.instance_of?(Array)
+        break if tile.side == piece.side
+
+        return false if tile == tile_with_piece_checking_king
+      end
+    end
+  end
+
+  def king_cant_move?(king)
+    input = number_to_letter(king.longitude).to_s + king.latitude.to_s
+    @target_longitude = letter_to_longitude(input[0])
+    @target_latitude = input[1].to_i
+    change_player
+    @moving = true
+    select_piece(@target_longitude, @target_latitude)
+    show_possible_moves
+    checkmate if @highlighted_tiles.empty?
+    ask_input unless @highlighted_tiles.empty?
   end
 
   def clear_highlighted_tiles(array)
@@ -416,7 +476,7 @@ class Chess
   end
 
   def display_check_message
-    puts "\nCHECK!".colorize(color: :yellow) if @check == true
+    puts "\nCHECK!".colorize(color: :yellow) if @check == true && @checkmate == false
   end
 
   def inside_the_board?(tile)
@@ -456,6 +516,7 @@ class Chess
   end
 
   def print_select_piece
+    # p @piece_checking_king
     # @highlighted_tiles.map { |n| puts "#{n.data} #{n.longitude}, #{n.latitude}" } unless @highlighted_tiles.nil?
     puts "\nCheck: #{@check}\nTurn: #{@turn}"
     if @turn == 'white'
@@ -466,6 +527,7 @@ class Chess
   end
 
   def print_move_to
+    # p @piece_checking_king
     # @highlighted_tiles.map { |n| puts "#{n.data} #{n.longitude}, #{n.latitude}" } unless @highlighted_tiles.nil?
     puts "\nCheck: #{@check}\nTurn: #{@turn}"
     if @turn == 'white'
