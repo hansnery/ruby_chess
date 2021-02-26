@@ -66,6 +66,7 @@ class Chess
   def moving(input)
     check_move(input)
     move(input)
+    puts 'promote pawn!' if @selected_piece.instance_of?(Pawn) && pawn_can_be_promoted?
     check_if_still_in_check if @check == true
     check_kings_safety
     change_player
@@ -511,6 +512,11 @@ class Chess
 
   def same_place?(input)
     input == number_to_letter(@selected_piece.longitude) + @selected_piece.latitude.to_s
+  end
+
+  def pawn_can_be_promoted?
+    @selected_piece.latitude == 8 && @turn == 'white' ||
+      @selected_piece.latitude == 1 && @turn == 'black'
   end
 
   def capture_piece
