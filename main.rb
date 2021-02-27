@@ -251,9 +251,9 @@ class Chess
     @check = false
     check_for_check(@white_king)
     check_for_check(@black_king)
-    display_check_message if @check == true
+    # display_check_message if @check == true
     check_for_checkmate if @check == true
-    # display_check_message if @check == true # && @checkmate == false
+    display_check_message if @check == true && @checkmate == false
   end
 
   def check_for_check(king)
@@ -437,6 +437,7 @@ class Chess
   def no_pawn_can_save_the_king?(tile_with_piece_checking_king)
     @pieces.map do |piece|
       next unless piece.side == @king_in_check.side && piece.instance_of?(Pawn)
+      next if piece.longitude.nil?
 
       piece.diagonal_attack.map do |move|
         tile = find_tile(piece.longitude + move[0], piece.latitude + move[1])
@@ -449,6 +450,7 @@ class Chess
   def no_other_piece_can_save_the_king?(tile_with_piece_checking_king)
     @pieces.map do |piece|
       next if piece.instance_of?(Pawn) || piece.instance_of?(King) || piece.side != @king_in_check.side
+      next if piece.longitude.nil?
 
       check_if_piece_can_save_the_king(piece, tile_with_piece_checking_king)
     end
@@ -503,7 +505,7 @@ class Chess
   end
 
   def display_check_message
-    puts "\nCHECK!".colorize(color: :yellow) if @check == true # && @checkmate == false
+    puts "\nCHECK!".colorize(color: :yellow) if @check == true && @checkmate == false
   end
 
   def inside_the_board?(tile)
