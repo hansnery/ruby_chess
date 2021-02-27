@@ -5,6 +5,7 @@
 class Chess
   Dir["#{File.dirname(__FILE__)}/lib/*.rb"].sort.each { |file| require file }
   require 'colorize'
+  require 'yaml'
   include BoardMethods
 
   def initialize
@@ -22,6 +23,7 @@ class Chess
     puts "\nWelcome to RubyChess!\n\nIn this program you can play chess using just the command line!"
     puts "\nTo select and move a piece, type in the piece\'s"
     puts 'coordinates using algebraic notation (eg: b3).'
+    puts "\nTo save the game, type \'save\'.\nTo load the saved game, type \'load\'."
   end
 
   def ask_input
@@ -39,6 +41,17 @@ class Chess
 
   def check_input(input)
     case input
+    when 'save'
+      puts "\nSaving game..."
+      # savegame = self.to_json
+      savegame = YAML.dump(self)
+      File.open('savegame.yaml', 'w') { |save| save.write savegame }
+      ask_input
+    when 'load'
+      puts "\nLoading game..."
+      savegame = File.open('savegame.yaml')
+      loaded_game = YAML.load(savegame)
+      loaded_game.ask_input
     when /^[a-hA-H]{1}[1-8]$/
       play_round(input)
     else
@@ -550,9 +563,6 @@ class Chess
   end
 
   def print_select_piece
-    p @moving
-    p @turn
-    p @selected_piece
     puts "\nCheck: #{@check}\nTurn: #{@turn}"
     if @turn == 'white'
       puts 'SELECT PIECE(WHITE): '.colorize(color: :yellow)
@@ -562,9 +572,6 @@ class Chess
   end
 
   def print_move_to
-    p @moving
-    p @turn
-    p @selected_piece
     puts "\nCheck: #{@check}\nTurn: #{@turn}"
     if @turn == 'white'
       puts 'MOVE TO(WHITE): '.colorize(color: :yellow)
