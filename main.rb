@@ -42,16 +42,9 @@ class Chess
   def check_input(input)
     case input
     when 'save'
-      puts "\nSaving game..."
-      # savegame = self.to_json
-      savegame = YAML.dump(self)
-      File.open('savegame.yaml', 'w') { |save| save.write savegame }
-      ask_input
+      savegame
     when 'load'
-      puts "\nLoading game..."
-      savegame = File.open('savegame.yaml')
-      loaded_game = YAML.load(savegame)
-      loaded_game.ask_input
+      load_savegame
     when /^[a-hA-H]{1}[1-8]$/
       play_round(input)
     else
@@ -79,7 +72,7 @@ class Chess
   def moving(input)
     check_move(input)
     move(input)
-    puts 'promote pawn!' if @selected_piece.instance_of?(Pawn) && pawn_can_be_promoted?
+    promote_pawn if @selected_piece.instance_of?(Pawn) && pawn_can_be_promoted?
     check_if_still_in_check if @check == true
     check_kings_safety
     change_player
@@ -264,9 +257,8 @@ class Chess
     @check = false
     check_for_check(@white_king)
     check_for_check(@black_king)
-    # display_check_message if @check == true
-    check_for_checkmate if @check == true
     display_check_message if @check == true && @checkmate == false
+    check_for_checkmate if @check == true
   end
 
   def check_for_check(king)
@@ -443,8 +435,8 @@ class Chess
   def check_for_checkmate
     find_king_in_check
     tile_with_piece_checking_king = find_tile(@piece_checking_king.longitude, @piece_checking_king.latitude)
-    king_cant_move?(@king_in_check) if no_pawn_can_save_the_king?(tile_with_piece_checking_king) &&
-                                       no_other_piece_can_save_the_king?(tile_with_piece_checking_king)
+    select_king_to_move(@king_in_check) if no_pawn_can_save_the_king?(tile_with_piece_checking_king) &&
+                                           no_other_piece_can_save_the_king?(tile_with_piece_checking_king)
   end
 
   def no_pawn_can_save_the_king?(tile_with_piece_checking_king)
@@ -465,6 +457,7 @@ class Chess
       next if piece.instance_of?(Pawn) || piece.instance_of?(King) || piece.side != @king_in_check.side
       next if piece.longitude.nil?
 
+      p check_if_piece_can_save_the_king(piece, tile_with_piece_checking_king)
       check_if_piece_can_save_the_king(piece, tile_with_piece_checking_king)
     end
     true
@@ -482,7 +475,7 @@ class Chess
     end
   end
 
-  def king_cant_move?(king)
+  def select_king_to_move(king)
     input = number_to_letter(king.longitude).to_s + king.latitude.to_s
     @target_longitude = letter_to_longitude(input[0])
     @target_latitude = input[1].to_i
@@ -534,14 +527,34 @@ class Chess
       @selected_piece.latitude == 1 && @turn == 'black'
   end
 
+  def promote_pawn
+    puts "\nPROMOTE PAWN TO:\n[1] KNIGHT\n[2] BISHOP\n[3] ROOK\n[4] QUEEN\n".colorize(color: :yellow)
+    input = gets.chomp
+    capture_piece
+    piece = switch_piece(input)
+    position_piece(piece)
+    @pieces << piece
+  end
+
+  def switch_piece(input)
+    case input
+    when '1'
+      Knight.new(@target_longitude, @target_latitude, @turn)
+    when '2'
+      Bishop.new(@target_longitude, @target_latitude, @turn)
+    when '3'
+      Rook.new(@target_longitude, @target_latitude, @turn)
+    when '4'
+      Queen.new(@target_longitude, @target_latitude, @turn)
+    end
+  end
+
   def capture_piece
     piece = find_piece(@target_longitude, @target_latitude)
-    # p piece
     return if piece.nil?
 
     piece.longitude = nil
     piece.latitude = nil
-    # p piece
   end
 
   def check_move(input)
@@ -562,8 +575,22 @@ class Chess
     end
   end
 
+  def savegame
+    puts "\nSaving game..."
+    savegame = YAML.dump(self)
+    File.open('savegame.yaml', 'w') { |save| save.write savegame }
+    ask_input
+  end
+
+  def load_savegame
+    puts "\nLoading game..."
+    savegame = File.open('savegame.yaml')
+    loaded_game = YAML.safe_load(savegame)
+    loaded_game.ask_input
+  end
+
   def print_select_piece
-    puts "\nCheck: #{@check}\nTurn: #{@turn}"
+    puts "\nCheck: #{@check}\nTurn: #{@turn}\n"
     if @turn == 'white'
       puts 'SELECT PIECE(WHITE): '.colorize(color: :yellow)
     else
@@ -572,7 +599,7 @@ class Chess
   end
 
   def print_move_to
-    puts "\nCheck: #{@check}\nTurn: #{@turn}"
+    puts "\nCheck: #{@check}\nTurn: #{@turn}\n"
     if @turn == 'white'
       puts 'MOVE TO(WHITE): '.colorize(color: :yellow)
     else
