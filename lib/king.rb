@@ -3,7 +3,7 @@
 # :nodoc:
 class King
   include BoardMethods
-  attr_accessor :longitude, :latitude, :data, :side, :check
+  attr_accessor :longitude, :latitude, :data, :moved_once, :side, :check
   attr_reader :possible_moves, :cardinal_directions, :intercardinal_directions
 
   def initialize(longitude, latitude, side)
@@ -11,6 +11,7 @@ class King
     @latitude = latitude
     @possible_moves = [[[0, 1]], [[1, 1]], [[1, 0]], [[1, -1]], [[0, -1]], [[-1, -1]], [[-1, 0]], [[-1, 1]]]
     @side = side
+    @moved_once = false
     @check = false
     set_character
     set_line_of_sight
@@ -37,5 +38,9 @@ class King
 
   def check?
     @check
+  end
+
+  def moved?
+    @moved_once
   end
 end
