@@ -435,6 +435,8 @@ class Chess
   def check_for_checkmate
     find_king_in_check
     tile_with_piece_checking_king = find_tile(@piece_checking_king.longitude, @piece_checking_king.latitude)
+    p no_pawn_can_save_the_king?(tile_with_piece_checking_king)
+    p no_other_piece_can_save_the_king?(tile_with_piece_checking_king)
     select_king_to_move(@king_in_check) if no_pawn_can_save_the_king?(tile_with_piece_checking_king) &&
                                            no_other_piece_can_save_the_king?(tile_with_piece_checking_king)
   end
@@ -457,22 +459,28 @@ class Chess
       next if piece.instance_of?(Pawn) || piece.instance_of?(King) || piece.side != @king_in_check.side
       next if piece.longitude.nil?
 
-      p check_if_piece_can_save_the_king(piece, tile_with_piece_checking_king)
-      check_if_piece_can_save_the_king(piece, tile_with_piece_checking_king)
+      return false unless piece_can_save_the_king?(piece, tile_with_piece_checking_king)
+
+      # piece_can_save_the_king?(piece, tile_with_piece_checking_king)
     end
     true
   end
 
-  def check_if_piece_can_save_the_king(piece, tile_with_piece_checking_king)
+  def piece_can_save_the_king?(piece, tile_with_piece_checking_king)
+    # break_loop = false
     piece.possible_moves.map do |direction|
+      # return false if break_loop == true
+
       direction.map do |move|
         tile = find_tile(piece.longitude + move[0], piece.latitude + move[1])
         next if tile.instance_of?(Array)
         break if tile.side == piece.side
 
+        # break_loop = true if tile == tile_with_piece_checking_king
         return false if tile == tile_with_piece_checking_king
       end
     end
+    true
   end
 
   def select_king_to_move(king)
@@ -528,7 +536,7 @@ class Chess
   end
 
   def promote_pawn
-    puts "\nPROMOTE PAWN TO:\n[1] KNIGHT\n[2] BISHOP\n[3] ROOK\n[4] QUEEN\n".colorize(color: :yellow)
+    puts "\n[1] KNIGHT\n[2] BISHOP\n[3] ROOK\n[4] QUEEN\nPROMOTE PAWN TO:\n".colorize(color: :yellow)
     input = gets.chomp
     capture_piece
     piece = switch_piece(input)
@@ -590,7 +598,7 @@ class Chess
   end
 
   def print_select_piece
-    puts "\nCheck: #{@check}\nTurn: #{@turn}\n"
+    # puts "\nCheck: #{@check}\nTurn: #{@turn}\n"
     if @turn == 'white'
       puts 'SELECT PIECE(WHITE): '.colorize(color: :yellow)
     else
@@ -599,7 +607,7 @@ class Chess
   end
 
   def print_move_to
-    puts "\nCheck: #{@check}\nTurn: #{@turn}\n"
+    # puts "\nCheck: #{@check}\nTurn: #{@turn}\n"
     if @turn == 'white'
       puts 'MOVE TO(WHITE): '.colorize(color: :yellow)
     else
