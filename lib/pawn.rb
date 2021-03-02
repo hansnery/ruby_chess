@@ -35,7 +35,7 @@ class Pawn
                        end
   end
 
-  def jumped?
+  def moved?
     @moved_once == true && @possible_moves.size > 1
   end
 end

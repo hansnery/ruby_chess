@@ -27,12 +27,12 @@ module BoardMethods
     @target_coordinate = target_coordinate(longitude, latitude)
   end
 
-  def move_piece(new_longitude, new_latitude)
-    empty_tile
-    @selected_piece.longitude = new_longitude
-    @selected_piece.latitude = new_latitude
-    @board.rows[8 - new_latitude][new_longitude - 1].data = @selected_piece.data
-    @board.rows[8 - new_latitude][new_longitude - 1].side = @selected_piece.side
+  def move_piece(piece, tile, new_longitude, new_latitude)
+    empty_tile(tile)
+    piece.longitude = new_longitude
+    piece.latitude = new_latitude
+    @board.rows[8 - new_latitude][new_longitude - 1].data = piece.data
+    @board.rows[8 - new_latitude][new_longitude - 1].side = piece.side
   end
 
   def target_coordinate(longitude, latitude, distance = [])
@@ -55,9 +55,9 @@ module BoardMethods
     return true if piece.longitude == @target_coordinate[0] && piece.latitude == @target_coordinate[1]
   end
 
-  def empty_tile
-    @selected_tile.data = '  '
-    @selected_tile.side = nil
+  def empty_tile(tile)
+    tile.data = '  '
+    tile.side = nil
   end
 
   def clear_board
@@ -154,9 +154,9 @@ module BoardMethods
   def white_second_row
     [
       @white_rook1 = Rook.new('a', 1, 'white'), @white_rook2 = Rook.new('h', 1, 'white'),
-      @white_knight1 = Knight.new('b', 1, 'white'), @white_knight2 = Knight.new('g', 3, 'white'),
-      @white_bishop1 = Bishop.new('c', 1, 'white'), @white_bishop2 = Bishop.new('f', 3, 'white'),
-      @white_king = King.new('e', 1, 'white'), @white_queen = Queen.new('d', 1, 'white')
+      @white_knight1 = Knight.new('b', 3, 'white'), @white_knight2 = Knight.new('g', 2, 'white'),
+      @white_bishop1 = Bishop.new('c', 3, 'white'), @white_bishop2 = Bishop.new('f', 2, 'white'),
+      @white_king = King.new('e', 1, 'white'), @white_queen = Queen.new('d', 3, 'white')
     ]
   end
 

@@ -1,1 +1,1 @@
-def check_input(input)
+cas

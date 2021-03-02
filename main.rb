@@ -70,6 +70,7 @@ class Chess
   end
 
   def moving(input)
+    castling(input) if @selected_piece.instance_of?(King)
     check_move(input)
     move(input)
     promote_pawn if @selected_piece.instance_of?(Pawn) && pawn_can_be_promoted?
@@ -122,8 +123,13 @@ class Chess
     knight_moves if @selected_piece.instance_of?(Knight)
     @line_of_sight = [] if @selected_piece.instance_of?(King)
     @tiles_in_check = [] if @selected_piece.instance_of?(King)
+    king_moves
+  end
+
+  def king_moves
     king_check if @selected_piece.instance_of?(King)
     check_for_surrounding_king(@selected_piece) if @selected_piece.instance_of?(King)
+    add_castling_moves if @selected_piece.instance_of?(King)
   end
 
   def piece_moves_longitudinally_or_transversally?(piece)
@@ -155,7 +161,7 @@ class Chess
     check_for_pawn_diagonals
     @selected_piece.possible_moves.map do |move|
       tile = find_tile(@target_longitude + move[0], @target_latitude + move[1])
-      @selected_piece.possible_moves.shift if @selected_piece.jumped? || tile.not_empty?
+      @selected_piece.possible_moves.shift if @selected_piece.moved? || tile.not_empty?
     end
   end
 
@@ -418,7 +424,7 @@ class Chess
     return if @check == false || @turn != @king_in_check.side
 
     select_piece(@target_longitude, @target_latitude)
-    move_piece(letter_to_longitude(@last_input[0]), @last_input[1].to_i)
+    move_piece(@selected_piece, @selected_tile, (@last_input[0]), @last_input[1].to_i)
     clear_board
     @moving = false
     @selected_piece.moved_once = false if @selected_piece.instance_of?(Pawn)
@@ -460,23 +466,17 @@ class Chess
       next if piece.longitude.nil?
 
       return false unless piece_can_save_the_king?(piece, tile_with_piece_checking_king)
-
-      # piece_can_save_the_king?(piece, tile_with_piece_checking_king)
     end
     true
   end
 
   def piece_can_save_the_king?(piece, tile_with_piece_checking_king)
-    # break_loop = false
     piece.possible_moves.map do |direction|
-      # return false if break_loop == true
-
       direction.map do |move|
         tile = find_tile(piece.longitude + move[0], piece.latitude + move[1])
         next if tile.instance_of?(Array)
         break if tile.side == piece.side
 
-        # break_loop = true if tile == tile_with_piece_checking_king
         return false if tile == tile_with_piece_checking_king
       end
     end
@@ -557,6 +557,103 @@ class Chess
     end
   end
 
+  def add_castling_moves
+    highlight_short_castling_tiles
+    highlight_long_castling_tiles
+  end
+
+  def highlight_short_castling_tiles
+    if @turn == 'white' && white_castling_short?
+      highlight_tile(find_tile(6, 1))
+      highlight_tile(find_tile(7, 1))
+    elsif @turn == 'black' && black_castling_short?
+      highlight_tile(find_tile(6, 8))
+      highlight_tile(find_tile(7, 8))
+    end
+  end
+
+  def highlight_long_castling_tiles
+    if @turn == 'white' && white_castling_long?
+      highlight_tile(find_tile(2, 1))
+      highlight_tile(find_tile(4, 1))
+    elsif @turn == 'black' && black_castling_long?
+      highlight_tile(find_tile(2, 8))
+      highlight_tile(find_tile(4, 8))
+    end
+  end
+
+  def white_castling_long?
+    @castle_tiles = []
+    first_tile = find_tile(2, 1)
+    second_tile = find_tile(3, 1)
+    third_tile = find_tile(4, 1)
+    return false unless !@white_rook1.moved? && !@white_king.moved? && first_tile.empty? &&
+                        second_tile.empty? && third_tile.empty?
+
+    @castle_tiles << first_tile
+    @castle_tiles << second_tile
+    @castle_tiles << third_tile
+  end
+
+  def black_castling_long?
+    @castle_tiles = []
+    first_tile = find_tile(2, 8)
+    second_tile = find_tile(3, 8)
+    third_tile = find_tile(4, 8)
+    return false unless !@black_rook1.moved? && !@black_king.moved? && first_tile.empty? &&
+                        second_tile.empty? && third_tile.empty?
+
+    @castle_tiles << first_tile
+    @castle_tiles << second_tile
+    @castle_tiles << third_tile
+  end
+
+  def white_castling_short?
+    @castle_tiles = []
+    first_tile = find_tile(6, 1)
+    second_tile = find_tile(7, 1)
+    return false unless !@white_rook2.moved? && !@white_king.moved? && first_tile.empty? && second_tile.empty?
+
+    @castle_tiles << first_tile
+    @castle_tiles << second_tile
+  end
+
+  def black_castling_short?
+    @castle_tiles = []
+    first_tile = find_tile(6, 8)
+    second_tile = find_tile(7, 8)
+    return false unless !@black_rook2.moved? && !@black_king.moved? && first_tile.empty? && second_tile.empty?
+
+    @castle_tiles << first_tile
+    @castle_tiles << second_tile
+  end
+
+  def white_castling(input)
+    if input == 'g1' && white_castling_short?
+      tile = find_tile(@white_rook2.longitude, @white_rook2.latitude)
+      move_piece(@white_rook2, tile, 6, 1)
+      move_piece(@black_rook2, tile, 6, 8)
+    elsif input == 'b1' && white_castling_long?
+      tile = find_tile(@white_rook1.longitude, @white_rook1.latitude)
+      move_piece(@white_rook1, tile, 3, 1)
+    end
+  end
+
+  def black_castling(input)
+    if input == 'g8' && black_castling_short?
+      tile = find_tile(@black_rook2.longitude, @black_rook2.latitude)
+      move_piece(@black_rook2, tile, 6, 8)
+    elsif input == 'b8' && black_castling_long?
+      tile = find_tile(@black_rook1.longitude, @black_rook1.latitude)
+      move_piece(@black_rook1, tile, 3, 8)
+    end
+  end
+
+  def castling(input)
+    white_castling(input)
+    black_castling(input)
+  end
+
   def capture_piece
     piece = find_piece(@target_longitude, @target_latitude)
     return if piece.nil?
@@ -577,7 +674,7 @@ class Chess
       latitude = tile.latitude.to_s
       next unless input == longitude + latitude
 
-      move_piece(letter_to_longitude(longitude), latitude.to_i)
+      move_piece(@selected_piece, @selected_tile, letter_to_longitude(longitude), latitude.to_i)
       clear_board
       @selected_piece.moved_once = true if @selected_piece.instance_of?(Pawn) && @selected_piece.moved_once == false
     end
