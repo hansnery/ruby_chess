@@ -427,7 +427,7 @@ class Chess
     move_piece(@selected_piece, @selected_tile, (@last_input[0]), @last_input[1].to_i)
     clear_board
     @moving = false
-    @selected_piece.moved_once = false if @selected_piece.instance_of?(Pawn)
+    @selected_piece.moved_once = false if @selected_piece.respond_to?(:moved?)
     try_again('king_still_in_check') if @check == true
   end
 
@@ -676,7 +676,7 @@ class Chess
 
       move_piece(@selected_piece, @selected_tile, letter_to_longitude(longitude), latitude.to_i)
       clear_board
-      @selected_piece.moved_once = true if @selected_piece.instance_of?(Pawn) && @selected_piece.moved_once == false
+      @selected_piece.moved_once = true if @selected_piece.respond_to?(:moved?) && @selected_piece.moved_once == false
     end
   end
 
