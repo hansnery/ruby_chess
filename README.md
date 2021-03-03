@@ -2,6 +2,7 @@
 # RUBY FINAL PROJECT
 
 Final project of the Odin Project's 'Ruby Programming' curriculum.
+
 https://www.theodinproject.com/courses/ruby-programming/lessons/ruby-final-project
 
 # Assigment
