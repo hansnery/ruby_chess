@@ -583,49 +583,68 @@ class Chess
   end
 
   def white_castling_long?
-    @castle_tiles = []
+    @long_castle_tiles = []
     first_tile = find_tile(2, 1)
     second_tile = find_tile(3, 1)
     third_tile = find_tile(4, 1)
     return false unless !@white_rook1.moved? && !@white_king.moved? && first_tile.empty? &&
                         second_tile.empty? && third_tile.empty?
 
-    @castle_tiles << first_tile
-    @castle_tiles << second_tile
-    @castle_tiles << third_tile
+    @long_castle_tiles << first_tile
+    @long_castle_tiles << second_tile
+    @long_castle_tiles << third_tile
+    return true if castling_tiles_not_in_danger?(@long_castle_tiles)
   end
 
   def black_castling_long?
-    @castle_tiles = []
+    @long_castle_tiles = []
     first_tile = find_tile(2, 8)
     second_tile = find_tile(3, 8)
     third_tile = find_tile(4, 8)
     return false unless !@black_rook1.moved? && !@black_king.moved? && first_tile.empty? &&
                         second_tile.empty? && third_tile.empty?
 
-    @castle_tiles << first_tile
-    @castle_tiles << second_tile
-    @castle_tiles << third_tile
+    @long_castle_tiles << first_tile
+    @long_castle_tiles << second_tile
+    @long_castle_tiles << third_tile
+    return true if castling_tiles_not_in_danger?(@long_castle_tiles)
   end
 
   def white_castling_short?
-    @castle_tiles = []
+    @short_castle_tiles = []
     first_tile = find_tile(6, 1)
     second_tile = find_tile(7, 1)
     return false unless !@white_rook2.moved? && !@white_king.moved? && first_tile.empty? && second_tile.empty?
 
-    @castle_tiles << first_tile
-    @castle_tiles << second_tile
+    @short_castle_tiles << first_tile
+    @short_castle_tiles << second_tile
+    return true if castling_tiles_not_in_danger?(@short_castle_tiles)
   end
 
   def black_castling_short?
-    @castle_tiles = []
+    @short_castle_tiles = []
     first_tile = find_tile(6, 8)
     second_tile = find_tile(7, 8)
     return false unless !@black_rook2.moved? && !@black_king.moved? && first_tile.empty? && second_tile.empty?
 
-    @castle_tiles << first_tile
-    @castle_tiles << second_tile
+    @short_castle_tiles << first_tile
+    @short_castle_tiles << second_tile
+    return true if castling_tiles_not_in_danger?(@short_castle_tiles)
+  end
+
+  def castling_tiles_not_in_danger?(array)
+    @pieces.map do |piece|
+      piece.possible_moves.map do |direction|
+        next if piece.side == @turn
+
+        direction.map do |move|
+          tile = find_tile(piece.longitude + move[0], piece.latitude + move[1])
+          break if tile.instance_of?(Array) || tile.not_empty?
+
+          return false if array.include?(tile)
+        end
+      end
+    end
   end
 
   def white_castling(input)
